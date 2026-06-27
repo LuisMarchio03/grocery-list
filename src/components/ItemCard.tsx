@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Tag, Camera, Eye, Pencil, Trash2 } from 'lucide-react'
+import { Tag, Image, Eye, Pencil, Trash2 } from 'lucide-react'
 
 type Item = {
   id: string
@@ -75,12 +75,11 @@ export default function ItemCard({
           title="Promoção"
         />
         <IconButton
-          icon={<Camera size={14} />}
+          icon={<Image size={14} />}
           onClick={() => {
             const input = document.createElement('input')
             input.type = 'file'
             input.accept = 'image/*'
-            input.capture = 'environment'
             input.onchange = (e) => {
               const file = (e.target as HTMLInputElement).files?.[0]
               if (file) onPhoto(file)
