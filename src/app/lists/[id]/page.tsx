@@ -1,12 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import PageHeader from '@/components/PageHeader'
 import AddItemForm from '@/components/AddItemForm'
 import ItemCard from '@/components/ItemCard'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import EmptyState from '@/components/EmptyState'
+import ImageViewer from '@/components/ImageViewer'
+import AccessibilityBar from '@/components/AccessibilityBar'
 
 type Item = {
   id: string
@@ -25,6 +27,7 @@ export default function ListPage() {
   const [editName, setEditName] = useState('')
   const [editQty, setEditQty] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<Item | null>(null)
+  const [viewingPhoto, setViewingPhoto] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`/api/lists/${id}`)
@@ -39,55 +42,102 @@ export default function ListPage() {
     setItems(data)
   }
 
-  async function addItem(name: string, quantity: string) {
-    await fetch(`/api/lists/${id}/items`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, quantity }),
-    })
-    fetchItems()
-  }
+  const addItem = useCallback(async (name: string, quantity: string) => {
+    const tempId = `temp-${crypto.randomUUID()}`
+    const optimistic: Item = {
+      id: tempId,
+      name,
+      quantity,
+      is_checked: 0,
+      is_promotion: 0,
+      photo_base64: '',
+    }
+    setItems(prev => [...prev, optimistic])
 
-  async function toggleCheck(item: Item) {
+    try {
+      const res = await fetch(`/api/lists/${id}/items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, quantity }),
+      })
+      if (res.ok) {
+        fetchItems()
+      } else {
+        setItems(prev => prev.filter(i => i.id !== tempId))
+      }
+    } catch {
+      setItems(prev => prev.filter(i => i.id !== tempId))
+    }
+  }, [id])
+
+  const toggleCheck = useCallback(async (item: Item) => {
+    setItems(prev =>
+      prev.map(i =>
+        i.id === item.id ? { ...i, is_checked: i.is_checked ? 0 : 1 } : i
+      )
+    )
+
     await fetch(`/api/items/${item.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_checked: item.is_checked ? 0 : 1 }),
     })
     fetchItems()
-  }
+  }, [])
 
-  async function togglePromotion(item: Item) {
+  const togglePromotion = useCallback(async (item: Item) => {
+    setItems(prev =>
+      prev.map(i =>
+        i.id === item.id ? { ...i, is_promotion: i.is_promotion ? 0 : 1 } : i
+      )
+    )
+
     await fetch(`/api/items/${item.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_promotion: item.is_promotion ? 0 : 1 }),
     })
     fetchItems()
-  }
+  }, [])
 
-  async function updateItem(itemId: string) {
+  const updateItem = useCallback(async (itemId: string) => {
     if (!editName.trim()) return
+    setEditingId(null)
+
+    setItems(prev =>
+      prev.map(i =>
+        i.id === itemId ? { ...i, name: editName.trim(), quantity: editQty.trim() } : i
+      )
+    )
+
     await fetch(`/api/items/${itemId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: editName.trim(), quantity: editQty.trim() }),
     })
-    setEditingId(null)
     fetchItems()
-  }
+  }, [editName, editQty])
 
-  async function deleteItem() {
+  const deleteItem = useCallback(async () => {
     if (!deleteTarget) return
-    await fetch(`/api/items/${deleteTarget.id}`, { method: 'DELETE' })
+    const deleted = deleteTarget
     setDeleteTarget(null)
-    fetchItems()
-  }
 
-  async function handlePhoto(file: File, itemId: string) {
+    setItems(prev => prev.filter(i => i.id !== deleted.id))
+
+    await fetch(`/api/items/${deleted.id}`, { method: 'DELETE' })
+    fetchItems()
+  }, [deleteTarget])
+
+  const handlePhoto = useCallback(async (file: File, itemId: string) => {
     const reader = new FileReader()
     reader.onload = async () => {
       const base64 = reader.result as string
+
+      setItems(prev =>
+        prev.map(i => (i.id === itemId ? { ...i, photo_base64: base64 } : i))
+      )
+
       await fetch(`/api/items/${itemId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -96,14 +146,19 @@ export default function ListPage() {
       fetchItems()
     }
     reader.readAsDataURL(file)
-  }
+  }, [])
 
   const unchecked = items.filter(i => !i.is_checked)
   const checked = items.filter(i => i.is_checked)
 
   return (
     <div>
-      <PageHeader title={listName} backTo="/" />
+      <div className="flex items-center gap-3 mb-6">
+        <div className="flex-1">
+          <PageHeader title={listName} backTo="/" />
+        </div>
+        <AccessibilityBar />
+      </div>
 
       <AddItemForm onAdd={addItem} />
 
@@ -131,6 +186,7 @@ export default function ListPage() {
                 }}
                 onDelete={() => setDeleteTarget(item)}
                 onPhoto={(file) => handlePhoto(file, item.id)}
+                onViewPhoto={() => setViewingPhoto(item.photo_base64)}
               />
             )}
           </div>
@@ -165,6 +221,7 @@ export default function ListPage() {
                       }}
                       onDelete={() => setDeleteTarget(item)}
                       onPhoto={(file) => handlePhoto(file, item.id)}
+                      onViewPhoto={() => setViewingPhoto(item.photo_base64)}
                     />
                   )}
                 </div>
@@ -188,6 +245,14 @@ export default function ListPage() {
         onConfirm={deleteItem}
         onCancel={() => setDeleteTarget(null)}
       />
+
+      {viewingPhoto && (
+        <ImageViewer
+          src={viewingPhoto}
+          alt="Foto do item"
+          onClose={() => setViewingPhoto(null)}
+        />
+      )}
     </div>
   )
 }

@@ -19,6 +19,7 @@ type Props = {
   onEdit: () => void
   onDelete: () => void
   onPhoto: (file: File) => void
+  onViewPhoto?: () => void
 }
 
 export default function ItemCard({
@@ -28,6 +29,7 @@ export default function ItemCard({
   onEdit,
   onDelete,
   onPhoto,
+  onViewPhoto,
 }: Props) {
   const [showPhoto, setShowPhoto] = useState(false)
 
@@ -93,7 +95,14 @@ export default function ItemCard({
             icon={<Eye size={14} />}
             active={showPhoto}
             activeClass="text-blue-500 bg-blue-50 border-blue-200"
-            onClick={() => setShowPhoto(!showPhoto)}
+            onClick={() => {
+              if (onViewPhoto) {
+                setShowPhoto(false)
+                onViewPhoto()
+              } else {
+                setShowPhoto(!showPhoto)
+              }
+            }}
             title="Ver foto"
           />
         )}
