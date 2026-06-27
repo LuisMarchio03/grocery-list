@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Plus, Pencil, Trash2, ShoppingBag, Check } from 'lucide-react'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import EmptyState from '@/components/EmptyState'
+import AccessibilityBar from '@/components/AccessibilityBar'
 
 type List = {
   id: string
@@ -64,10 +65,11 @@ export default function Home() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
           <ShoppingBag size={20} className="text-white" />
         </div>
-        <h1 className="text-xl font-semibold text-slate-900">Minhas Listas</h1>
+        <h1 className="text-xl font-semibold text-slate-900 flex-1">Minhas Listas</h1>
+        <AccessibilityBar />
       </div>
 
       <div className="flex gap-2 mb-6">
