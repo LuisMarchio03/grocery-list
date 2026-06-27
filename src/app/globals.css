@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --text-scale: 1;
+}
+
+[data-text-scale] {
+  --text-scale: 1;
+}
+[data-text-scale="sm"] { --text-scale: 0.875; }
+[data-text-scale="lg"] { --text-scale: 1.125; }
+[data-text-scale="xl"] { --text-scale: 1.25; }
+
 @layer base {
   * {
     -webkit-tap-highlight-color: transparent;
@@ -9,10 +20,12 @@
 
   html {
     @apply antialiased;
+    font-size: calc(16px * var(--text-scale));
   }
 
   body {
     @apply bg-slate-50 text-slate-900 min-h-dvh;
+    overflow-x: hidden;
   }
 
   input[type="checkbox"] {

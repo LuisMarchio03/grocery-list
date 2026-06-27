@@ -30,7 +30,7 @@ export default function AddItemForm({ onAdd }: Props) {
         />
       </div>
       <input
-        className="w-20 h-11 px-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-center"
+        className="w-16 h-11 px-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-center"
         placeholder="Qtd"
         value={qty}
         onChange={e => setQty(e.target.value)}
