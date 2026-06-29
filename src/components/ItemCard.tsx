@@ -35,41 +35,43 @@ export default function ItemCard({
 
   return (
     <div
-      className={`bg-surface rounded-xl border border-border shadow-sm px-4 py-3.5 flex items-center gap-3 transition-all duration-200 ${
+      className={`bg-surface rounded-xl border border-border shadow-sm px-4 py-3.5 transition-all duration-200 ${
         item.is_checked ? 'opacity-50' : 'animate-slide-up'
       }`}
     >
-      <input
-        type="checkbox"
-        checked={!!item.is_checked}
-        onChange={onToggleCheck}
-        className="animate-check-bounce"
-        title="Marcar como comprado"
-      />
+      <div className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          checked={!!item.is_checked}
+          onChange={onToggleCheck}
+          className="animate-check-bounce shrink-0"
+          title="Marcar como comprado"
+        />
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span
-            className={`text-base font-medium ${
-              item.is_checked ? 'line-through text-fg-muted' : 'text-fg'
-            }`}
-          >
-            {item.name}
-          </span>
-          {item.quantity && (
-            <span className="text-xs font-medium text-fg-muted bg-surface-2 px-2 py-0.5 rounded-full">
-              {item.quantity}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span
+              className={`text-base font-medium break-words ${
+                item.is_checked ? 'line-through text-fg-muted' : 'text-fg'
+              }`}
+            >
+              {item.name}
             </span>
-          )}
-          {!!item.is_promotion && (
-            <span className="text-[11px] font-bold text-orange-700 bg-orange-100 border border-orange-200 px-1.5 py-0.5 rounded-full dark:text-orange-300 dark:bg-orange-950 dark:border-orange-900">
-              PROMO
-            </span>
-          )}
+            {item.quantity && (
+              <span className="text-xs font-medium text-fg-muted bg-surface-2 px-2 py-0.5 rounded-full">
+                {item.quantity}
+              </span>
+            )}
+            {!!item.is_promotion && (
+              <span className="text-[11px] font-bold text-orange-700 bg-orange-100 border border-orange-200 px-1.5 py-0.5 rounded-full dark:text-orange-300 dark:bg-orange-950 dark:border-orange-900">
+                PROMO
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-1 shrink-0">
+      <div className="flex items-center gap-1 mt-3 flex-wrap">
         <IconButton
           icon={<Tag size={16} />}
           active={!!item.is_promotion}
