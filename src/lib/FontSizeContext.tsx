@@ -33,7 +33,7 @@ export function FontSizeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     localStorage.setItem('fontSize', size)
-    document.documentElement.setAttribute('data-text-scale', size)
+    document.documentElement.style.fontSize = `${scales[size] * 100}%`
   }, [size])
 
   return (

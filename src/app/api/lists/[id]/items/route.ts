@@ -26,3 +26,15 @@ export async function POST(
   })
   return NextResponse.json({ id: itemId, name, quantity }, { status: 201 })
 }
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: { id: string } }
+) {
+  const db = getDb()
+  await db.execute({
+    sql: 'DELETE FROM items WHERE list_id = ? AND is_checked = 1',
+    args: [params.id],
+  })
+  return NextResponse.json({ success: true })
+}

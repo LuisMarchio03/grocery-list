@@ -2,35 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --text-scale: 1;
-}
-
-[data-text-scale] {
-  --text-scale: 1;
-}
-[data-text-scale="sm"] { --text-scale: 0.875; }
-[data-text-scale="lg"] { --text-scale: 1.125; }
-[data-text-scale="xl"] { --text-scale: 1.25; }
-
 @layer base {
+  :root {
+    --bg: 248 250 252;
+    --surface: 255 255 255;
+    --surface-2: 241 245 249;
+    --border: 226 232 240;
+    --fg: 15 23 42;
+    --fg-muted: 71 85 105;
+    --accent: 37 99 235;
+    --accent-hover: 29 78 216;
+    --accent-fg: 255 255 255;
+    --ring: 37 99 235;
+  }
+
+  .dark {
+    --bg: 2 6 23;
+    --surface: 15 23 42;
+    --surface-2: 30 41 59;
+    --border: 51 65 85;
+    --fg: 241 245 249;
+    --fg-muted: 148 163 184;
+    --accent: 59 130 246;
+    --accent-hover: 96 165 250;
+    --accent-fg: 255 255 255;
+    --ring: 96 165 250;
+  }
+
   * {
     -webkit-tap-highlight-color: transparent;
   }
 
   html {
     @apply antialiased;
-    font-size: calc(16px * var(--text-scale));
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 min-h-dvh;
-    overflow-x: hidden;
+    @apply bg-bg text-fg min-h-dvh;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-bg;
   }
 
   input[type="checkbox"] {
-    @apply appearance-none w-5 h-5 border-2 border-slate-300 rounded-md
-      checked:bg-blue-600 checked:border-blue-600
+    @apply appearance-none w-6 h-6 border-2 border-border rounded-md
+      checked:bg-accent checked:border-accent
       transition-all duration-200 ease-out
       cursor-pointer shrink-0 relative;
   }
@@ -43,50 +60,21 @@
 }
 
 @layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.2s ease-out;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.25s ease-out;
-  }
-
-  .animate-scale-in {
-    animation: scaleIn 0.2s ease-out;
-  }
-
-  .animate-check-bounce {
-    animation: checkBounce 0.3s ease-out;
-  }
+  .animate-fade-in { animation: fadeIn 0.2s ease-out; }
+  .animate-slide-up { animation: slideUp 0.25s ease-out; }
+  .animate-scale-in { animation: scaleIn 0.2s ease-out; }
+  .animate-check-bounce { animation: checkBounce 0.3s ease-out; }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
-
 @keyframes checkBounce {
   0% { transform: scale(1); }
   50% { transform: scale(1.15); }
