@@ -1,7 +1,7 @@
 'use client'
 
 import { useFontSize } from '@/lib/FontSizeContext'
-import { Minus, Plus } from 'lucide-react'
+import { Type, Minus, Plus } from 'lucide-react'
 
 const sizes = [
   { value: 'sm' as const, label: 'P' },
@@ -12,6 +12,7 @@ const sizes = [
 
 export default function AccessibilityBar() {
   const { size, setSize } = useFontSize()
+
   const currentIndex = sizes.findIndex(s => s.value === size)
 
   function cyclePrev() {
@@ -27,34 +28,33 @@ export default function AccessibilityBar() {
   return (
     <div className="flex items-center gap-1">
       <button
-        className="w-11 h-11 flex items-center justify-center rounded-xl border border-border text-fg-muted hover:text-fg hover:bg-surface-2 transition-all active:scale-90 shrink-0"
+        className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 hover:bg-slate-50 transition-all active:scale-90"
         onClick={cyclePrev}
         title="Diminuir fonte"
       >
-        <Minus size={16} />
+        <Minus size={14} />
       </button>
       <div className="flex items-center gap-0.5">
         {sizes.map((s) => (
           <button
             key={s.value}
-            className={`w-11 h-11 flex items-center justify-center rounded-lg text-sm font-semibold transition-all ${
+            className={`w-7 h-7 flex items-center justify-center rounded-md text-xs font-medium transition-all ${
               size === s.value
-                ? 'bg-accent text-accent-fg'
-                : 'text-fg-muted hover:text-fg hover:bg-surface-2'
+                ? 'bg-blue-600 text-white'
+                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
             }`}
             onClick={() => setSize(s.value)}
-            title={`Fonte ${s.label}`}
           >
             {s.label}
           </button>
         ))}
       </div>
       <button
-        className="w-11 h-11 flex items-center justify-center rounded-xl border border-border text-fg-muted hover:text-fg hover:bg-surface-2 transition-all active:scale-90 shrink-0"
+        className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 hover:bg-slate-50 transition-all active:scale-90"
         onClick={cycleNext}
         title="Aumentar fonte"
       >
-        <Plus size={16} />
+        <Plus size={14} />
       </button>
     </div>
   )

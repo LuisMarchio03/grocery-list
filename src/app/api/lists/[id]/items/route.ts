@@ -7,7 +7,11 @@ export async function GET(
 ) {
   const db = getDb()
   const result = await db.execute({
-    sql: 'SELECT * FROM items WHERE list_id = ? ORDER BY is_checked ASC, created_at ASC',
+    sql: `SELECT id, list_id, name, quantity, is_checked, is_promotion,
+                 CASE WHEN photo_base64 IS NOT NULL AND photo_base64 != '' THEN 1 ELSE 0 END AS has_photo,
+                 created_at
+          FROM items WHERE list_id = ?
+          ORDER BY is_checked ASC, created_at ASC`,
     args: [params.id],
   })
   return NextResponse.json(result.rows)
@@ -25,16 +29,4 @@ export async function POST(
     args: [itemId, params.id, name, quantity || ''],
   })
   return NextResponse.json({ id: itemId, name, quantity }, { status: 201 })
-}
-
-export async function DELETE(
-  _request: Request,
-  { params }: { params: { id: string } }
-) {
-  const db = getDb()
-  await db.execute({
-    sql: 'DELETE FROM items WHERE list_id = ? AND is_checked = 1',
-    args: [params.id],
-  })
-  return NextResponse.json({ success: true })
 }

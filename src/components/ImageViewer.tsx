@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { X, ZoomIn, ZoomOut } from 'lucide-react'
+import { useState } from 'react'
 
 type Props = {
   src: string
@@ -29,27 +30,27 @@ export default function ImageViewer({ src, alt, onClose }: Props) {
         className="relative max-w-full max-h-full flex flex-col items-center"
         onClick={e => e.stopPropagation()}
       >
-        <div className="absolute -top-14 right-0 flex gap-2">
+        <div className="absolute -top-12 right-0 flex gap-2">
           <button
-            className="w-11 h-11 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-all flex items-center justify-center backdrop-blur-sm"
+            className="w-9 h-9 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-all flex items-center justify-center backdrop-blur-sm"
             onClick={() => setScale(s => Math.min(s + 0.5, 3))}
             title="Aumentar zoom"
           >
-            <ZoomIn size={20} />
+            <ZoomIn size={18} />
           </button>
           <button
-            className="w-11 h-11 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-all flex items-center justify-center backdrop-blur-sm"
+            className="w-9 h-9 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-all flex items-center justify-center backdrop-blur-sm"
             onClick={() => setScale(s => Math.max(s - 0.5, 0.5))}
             title="Diminuir zoom"
           >
-            <ZoomOut size={20} />
+            <ZoomOut size={18} />
           </button>
           <button
-            className="w-11 h-11 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-all flex items-center justify-center backdrop-blur-sm"
+            className="w-9 h-9 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-all flex items-center justify-center backdrop-blur-sm"
             onClick={onClose}
             title="Fechar"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
         <img
