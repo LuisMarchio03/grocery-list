@@ -3,7 +3,12 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   const db = getDb()
-  const result = await db.execute('SELECT * FROM lists ORDER BY created_at DESC')
+  const result = await db.execute(
+    `SELECT l.id, l.name, l.created_at,
+            (SELECT COUNT(*) FROM items i WHERE i.list_id = l.id) AS item_count
+     FROM lists l
+     ORDER BY l.created_at DESC`
+  )
   return NextResponse.json(result.rows)
 }
 

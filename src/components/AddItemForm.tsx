@@ -5,15 +5,20 @@ import { Plus } from 'lucide-react'
 
 type Props = {
   onAdd: (name: string, quantity: string) => void
+  existingNames?: string[]
+  onDuplicate?: (name: string) => void
 }
 
-export default function AddItemForm({ onAdd }: Props) {
+export default function AddItemForm({ onAdd, existingNames = [], onDuplicate }: Props) {
   const [name, setName] = useState('')
   const [qty, setQty] = useState('')
 
   function handleSubmit() {
-    if (!name.trim()) return
-    onAdd(name.trim(), qty.trim())
+    const trimmed = name.trim()
+    if (!trimmed) return
+    const dup = existingNames.some(n => n.toLowerCase() === trimmed.toLowerCase())
+    if (dup && onDuplicate) onDuplicate(trimmed)
+    onAdd(trimmed, qty.trim())
     setName('')
     setQty('')
   }
@@ -27,6 +32,7 @@ export default function AddItemForm({ onAdd }: Props) {
           value={name}
           onChange={e => setName(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+          autoFocus
         />
       </div>
       <input

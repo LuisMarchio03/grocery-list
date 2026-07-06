@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { Tag, Image, Eye, Pencil, Trash2 } from 'lucide-react'
 
 type Item = {
@@ -9,7 +8,7 @@ type Item = {
   quantity: string
   is_checked: number
   is_promotion: number
-  photo_base64: string
+  has_photo: number
 }
 
 type Props = {
@@ -31,53 +30,56 @@ export default function ItemCard({
   onPhoto,
   onViewPhoto,
 }: Props) {
-  const [showPhoto, setShowPhoto] = useState(false)
-
   return (
     <div
-      className={`bg-white rounded-xl border border-slate-100 shadow-sm px-4 py-3.5 flex items-center gap-3 transition-all duration-200 ${
+      className={`bg-white rounded-xl border border-slate-100 shadow-sm px-4 py-3.5 flex flex-col gap-3 transition-all duration-200 ${
         item.is_checked ? 'opacity-40' : 'animate-slide-up'
       }`}
     >
-      <input
-        type="checkbox"
-        checked={!!item.is_checked}
-        onChange={onToggleCheck}
-        className="animate-check-bounce"
-      />
+      {/* Fileira 1: checkbox + nome do produto */}
+      <div className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          checked={!!item.is_checked}
+          onChange={onToggleCheck}
+          className="animate-check-bounce"
+        />
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span
-            className={`text-sm font-medium ${
-              item.is_checked ? 'line-through text-slate-400' : 'text-slate-800'
-            }`}
-          >
-            {item.name}
-          </span>
-          {item.quantity && (
-            <span className="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-              {item.quantity}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span
+              className={`text-sm font-medium ${
+                item.is_checked ? 'line-through text-slate-400' : 'text-slate-800'
+              }`}
+            >
+              {item.name}
             </span>
-          )}
-          {!!item.is_promotion && (
-            <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded-full">
-              PROMO
-            </span>
-          )}
+            {item.quantity && (
+              <span className="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                {item.quantity}
+              </span>
+            )}
+            {!!item.is_promotion && (
+              <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded-full">
+                PROMO
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-1 shrink-0">
-        <IconButton
-          icon={<Tag size={14} />}
+      {/* Fileira 2: botões de interação — largura total, alvos grandes p/ toque */}
+      <div className="flex items-stretch gap-1.5 pt-2 border-t border-slate-100">
+        <ActionButton
+          icon={<Tag size={18} />}
+          label="Promoção"
           active={!!item.is_promotion}
-          activeClass="text-orange-500 bg-orange-50 border-orange-200"
+          activeClass="text-orange-600 bg-orange-50 border-orange-200"
           onClick={onTogglePromotion}
-          title="Promoção"
         />
-        <IconButton
-          icon={<Image size={14} />}
+        <ActionButton
+          icon={<Image size={18} />}
+          label="Foto"
           onClick={() => {
             const input = document.createElement('input')
             input.type = 'file'
@@ -88,75 +90,59 @@ export default function ItemCard({
             }
             input.click()
           }}
-          title="Foto"
         />
-        {item.photo_base64 && (
-          <IconButton
-            icon={<Eye size={14} />}
-            active={showPhoto}
-            activeClass="text-blue-500 bg-blue-50 border-blue-200"
-            onClick={() => {
-              if (onViewPhoto) {
-                setShowPhoto(false)
-                onViewPhoto()
-              } else {
-                setShowPhoto(!showPhoto)
-              }
-            }}
-            title="Ver foto"
+        {!!item.has_photo && onViewPhoto && (
+          <ActionButton
+            icon={<Eye size={18} />}
+            label="Ver"
+            onClick={onViewPhoto}
           />
         )}
-        <IconButton
-          icon={<Pencil size={14} />}
+        <ActionButton
+          icon={<Pencil size={18} />}
+          label="Editar"
           onClick={onEdit}
-          title="Editar"
         />
-        <IconButton
-          icon={<Trash2 size={14} />}
+        <ActionButton
+          icon={<Trash2 size={18} />}
+          label="Excluir"
+          activeClass="text-red-500 bg-red-50 border-red-200"
+          danger
           onClick={onDelete}
-          title="Excluir"
         />
       </div>
-
-      {showPhoto && item.photo_base64 && (
-        <div className="absolute top-full right-0 z-10 mt-2 animate-fadeIn">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-2">
-            <img
-              src={item.photo_base64}
-              alt="Foto do item"
-              className="max-w-40 max-h-40 rounded-lg object-cover"
-            />
-          </div>
-        </div>
-      )}
     </div>
   )
 }
 
-function IconButton({
+function ActionButton({
   icon,
+  label,
   active = false,
   activeClass = '',
+  danger = false,
   onClick,
-  title,
 }: {
   icon: React.ReactNode
+  label: string
   active?: boolean
   activeClass?: string
+  danger?: boolean
   onClick: () => void
-  title: string
 }) {
+  const base =
+    'flex-1 min-h-[44px] flex flex-col items-center justify-center gap-0.5 rounded-lg border transition-all duration-150 active:scale-95'
+  const idle = danger
+    ? 'border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50'
+    : 'border-slate-200 text-slate-500 hover:text-slate-700 hover:border-slate-300 hover:bg-slate-50'
   return (
     <button
-      className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all duration-150 active:scale-90 ${
-        active
-          ? activeClass
-          : 'border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-      }`}
+      className={`${base} ${active ? activeClass : idle}`}
       onClick={onClick}
-      title={title}
+      title={label}
     >
       {icon}
+      <span className="text-[10px] font-medium leading-none">{label}</span>
     </button>
   )
 }
