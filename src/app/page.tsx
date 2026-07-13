@@ -2,19 +2,21 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, Trash2, ShoppingBag, Check, Users, LogOut, User, ChevronDown } from 'lucide-react'
+import { Plus, Pencil, Trash2, ShoppingBag, Check, Users, LogOut, User, ChevronDown, RefreshCw } from 'lucide-react'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import EmptyState from '@/components/EmptyState'
 import AccessibilityBar from '@/components/AccessibilityBar'
 import SyncStatus from '@/components/SyncStatus'
 import OfflineBanner from '@/components/OfflineBanner'
 import { useListsSync, type ListRow } from '@/lib/useListsSync'
+import { usePullToRefresh } from '@/lib/usePullToRefresh'
 import { useAuth } from '@/lib/AuthContext'
 
 type GroupOption = { id: string; name: string }
 
 export default function Home() {
-  const { lists, status, lastSyncedAt, online, syncNow, createList, renameList, deleteList } = useListsSync()
+  const { lists, status, lastSyncedAt, online, externalChanges, syncNow, createList, renameList, deleteList } = useListsSync()
+  const ptr = usePullToRefresh(syncNow)
   const { user, logout } = useAuth()
   const [newName, setNewName] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -50,7 +52,19 @@ export default function Home() {
   }
 
   return (
-    <div>
+    <div
+      onTouchStart={ptr.onTouchStart}
+      onTouchMove={ptr.onTouchMove}
+      onTouchEnd={ptr.onTouchEnd}
+    >
+      {ptr.pulling && (
+        <div className="flex justify-center items-center h-16 -mt-4 mb-2 transition-all" style={{ opacity: Math.min(ptr.pullDistance / 80, 1) }}>
+          <div className="flex items-center gap-2 text-xs text-blue-500 dark:text-blue-400 font-medium">
+            <RefreshCw size={14} className={ptr.pullDistance >= 80 ? 'animate-spin' : ''} />
+            {ptr.pullDistance >= 80 ? 'Solte para atualizar' : 'Puxe para atualizar'}
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-3 mb-2">
         <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
           <ShoppingBag size={20} className="text-white" />
@@ -81,7 +95,7 @@ export default function Home() {
       </div>
 
       <div className="mb-5">
-        <SyncStatus status={status} lastSyncedAt={lastSyncedAt} online={online} onSync={syncNow} />
+        <SyncStatus status={status} lastSyncedAt={lastSyncedAt} online={online} onSync={syncNow} hasChanges={externalChanges} />
       </div>
 
       <OfflineBanner online={online} />

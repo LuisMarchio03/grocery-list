@@ -1,1 +1,3 @@
-export const POLL_INTERVAL_MS = 4000
+export const POLL_INTERVAL_MS = 1500
+
+export const SYNC_INDICATOR_TIMEOUT_MS = 8000

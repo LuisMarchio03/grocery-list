@@ -16,12 +16,14 @@ async function canAccessList(listId: string, userId: string): Promise<boolean> {
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const user = getUserFromCookies()
+  const user = await getUserFromCookies()
   if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
 
-  if (!(await canAccessList(params.id, user.userId))) {
+  const { id } = await params
+
+  if (!(await canAccessList(id, user.userId))) {
     return NextResponse.json({ error: 'Lista não encontrada.' }, { status: 404 })
   }
 
@@ -31,28 +33,30 @@ export async function GET(
                  CASE WHEN photo_base64 != '' THEN 1 ELSE 0 END AS has_photo,
                  created_at
           FROM items WHERE list_id = ? ORDER BY is_checked ASC, created_at ASC`,
-    args: [params.id],
+    args: [id],
   })
   return NextResponse.json(result.rows)
 }
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const user = getUserFromCookies()
+  const user = await getUserFromCookies()
   if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
 
-  if (!(await canAccessList(params.id, user.userId))) {
+  const { id: listId } = await params
+
+  if (!(await canAccessList(listId, user.userId))) {
     return NextResponse.json({ error: 'Lista não encontrada.' }, { status: 404 })
   }
 
   const db = getDb()
   const { name, quantity } = await request.json()
-  const id = crypto.randomUUID()
+  const itemId = crypto.randomUUID()
   await db.execute({
     sql: 'INSERT INTO items (id, list_id, name, quantity) VALUES (?, ?, ?, ?)',
-    args: [id, params.id, name, quantity || ''],
+    args: [itemId, listId, name, quantity || ''],
   })
-  return NextResponse.json({ id, name, quantity: quantity || '' }, { status: 201 })
+  return NextResponse.json({ id: itemId, name, quantity: quantity || '' }, { status: 201 })
 }

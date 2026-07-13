@@ -18,12 +18,14 @@ async function canAccessItem(itemId: string, userId: string): Promise<boolean> {
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const user = getUserFromCookies()
+  const user = await getUserFromCookies()
   if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
 
-  if (!(await canAccessItem(params.id, user.userId))) {
+  const { id } = await params
+
+  if (!(await canAccessItem(id, user.userId))) {
     return NextResponse.json({ error: 'Item não encontrado.' }, { status: 404 })
   }
 
@@ -35,7 +37,7 @@ export async function PUT(
     if (key in body) {
       await db.execute({
         sql: `UPDATE items SET ${key} = ? WHERE id = ?`,
-        args: [body[key], params.id],
+        args: [body[key], id],
       })
     }
   }
@@ -44,19 +46,21 @@ export async function PUT(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const user = getUserFromCookies()
+  const user = await getUserFromCookies()
   if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
 
-  if (!(await canAccessItem(params.id, user.userId))) {
+  const { id } = await params
+
+  if (!(await canAccessItem(id, user.userId))) {
     return NextResponse.json({ error: 'Item não encontrado.' }, { status: 404 })
   }
 
   const db = getDb()
   await db.execute({
     sql: 'DELETE FROM items WHERE id = ?',
-    args: [params.id],
+    args: [id],
   })
   return NextResponse.json({ success: true })
 }

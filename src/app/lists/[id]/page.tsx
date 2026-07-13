@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
-import { Trash2, Users } from 'lucide-react'
+import { Trash2, Users, RefreshCw } from 'lucide-react'
 import PageHeader from '@/components/PageHeader'
 import AddItemForm from '@/components/AddItemForm'
 import ItemCard from '@/components/ItemCard'
@@ -16,15 +16,17 @@ import ListProgress from '@/components/ListProgress'
 import ItemSearch from '@/components/ItemSearch'
 import { useListSync } from '@/lib/useListSync'
 import { useToast } from '@/lib/ToastContext'
+import { usePullToRefresh } from '@/lib/usePullToRefresh'
 import type { Item } from '@/lib/sync/types'
 
 export default function ListPage() {
   const { id } = useParams<{ id: string }>()
   const toast = useToast()
   const {
-    items, status, lastSyncedAt, online, syncNow, setEditing,
+    items, status, lastSyncedAt, online, externalChanges, syncNow, setEditing,
     addItem, updateItem, deleteItem, clearChecked,
   } = useListSync(id)
+  const ptr = usePullToRefresh(syncNow)
 
   const [listName, setListName] = useState('')
   const [listGroup, setListGroup] = useState<string | null>(null)
@@ -107,7 +109,19 @@ export default function ListPage() {
   }
 
   return (
-    <div>
+    <div
+      onTouchStart={ptr.onTouchStart}
+      onTouchMove={ptr.onTouchMove}
+      onTouchEnd={ptr.onTouchEnd}
+    >
+      {ptr.pulling && (
+        <div className="flex justify-center items-center h-16 -mt-4 mb-2 transition-all" style={{ opacity: Math.min(ptr.pullDistance / 80, 1) }}>
+          <div className="flex items-center gap-2 text-xs text-blue-500 dark:text-blue-400 font-medium">
+            <RefreshCw size={14} className={ptr.pullDistance >= 80 ? 'animate-spin' : ''} />
+            {ptr.pullDistance >= 80 ? 'Solte para atualizar' : 'Puxe para atualizar'}
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-3 mb-2">
         <div className="flex-1 min-w-0">
           <PageHeader title={listName} backTo="/" />
@@ -121,7 +135,7 @@ export default function ListPage() {
       </div>
 
       <div className="flex items-center justify-between mb-5">
-        <SyncStatus status={status} lastSyncedAt={lastSyncedAt} online={online} onSync={syncNow} />
+        <SyncStatus status={status} lastSyncedAt={lastSyncedAt} online={online} onSync={syncNow} hasChanges={externalChanges} />
         {totalChecked > 0 && (
           <button
             onClick={() => setClearOpen(true)}

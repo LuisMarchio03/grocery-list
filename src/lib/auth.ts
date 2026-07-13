@@ -29,13 +29,13 @@ export function verifyToken(token: string): JwtPayload {
   return jwt.verify(token, getSecret()) as JwtPayload
 }
 
-export function getTokenFromCookies(): string | undefined {
-  return cookies().get('token')?.value
+export async function getTokenFromCookies(): Promise<string | undefined> {
+  return (await cookies()).get('token')?.value
 }
 
-export function getUserFromCookies(): JwtPayload | null {
+export async function getUserFromCookies(): Promise<JwtPayload | null> {
   try {
-    const token = getTokenFromCookies()
+    const token = await getTokenFromCookies()
     if (!token) return null
     return verifyToken(token)
   } catch {

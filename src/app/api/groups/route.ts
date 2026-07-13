@@ -3,7 +3,7 @@ import { getUserFromCookies } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const user = getUserFromCookies()
+  const user = await getUserFromCookies()
   if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
 
   const db = getDb()
@@ -20,7 +20,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const user = getUserFromCookies()
+  const user = await getUserFromCookies()
   if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
 
   const { name } = await request.json()

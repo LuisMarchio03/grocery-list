@@ -11,15 +11,16 @@ export function useListSync(listId: string) {
   const [items, setItems] = useState<Item[]>([])
   const [status, setStatus] = useState<SyncStatusValue>('idle')
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null)
+  const [externalChanges, setExternalChanges] = useState(false)
   const online = useOnlineStatus()
   const toast = useToast()
 
-  // refs para evitar stale closures dentro do intervalo
   const pendingCount = useRef(0)
   const editingRef = useRef(false)
   const itemsRef = useRef<Item[]>([])
   const queueRef = useRef<QueuedMutation[]>([])
   const flushingRef = useRef(false)
+  const externalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   itemsRef.current = items
 
   const fetchItems = useCallback(async (manual = false): Promise<boolean> => {
@@ -29,9 +30,21 @@ export function useListSync(listId: string) {
       const res = await fetch(`/api/lists/${listId}/items`)
       if (!res.ok) throw new Error('fetch failed')
       const remote: Item[] = await res.json()
+      const prevIds = new Set(itemsRef.current.map(i => i.id))
+      const hasNew = remote.some(i => !prevIds.has(i.id) && !i.id.startsWith('temp-'))
+      const hasRemoved = itemsRef.current.some(i => !remote.find(r => r.id === i.id) && !i.id.startsWith('temp-'))
+      const hasExternalChange = hasNew || hasRemoved
+
       setItems(applySnapshot(itemsRef.current, remote))
       setLastSyncedAt(Date.now())
       setStatus('synced')
+
+      if (hasExternalChange) {
+        setExternalChanges(true)
+        if (externalTimerRef.current) clearTimeout(externalTimerRef.current)
+        externalTimerRef.current = setTimeout(() => setExternalChanges(false), 2000)
+      }
+
       return true
     } catch {
       setStatus(navigator.onLine ? 'error' : 'offline')
@@ -40,13 +53,11 @@ export function useListSync(listId: string) {
     }
   }, [listId, toast])
 
-  // carga inicial
   useEffect(() => {
     setStatus('syncing')
     fetchItems()
   }, [fetchItems])
 
-  // polling, pausado em background
   useEffect(() => {
     const tick = () => {
       if (document.visibilityState === 'visible' && navigator.onLine) fetchItems()
@@ -60,7 +71,10 @@ export function useListSync(listId: string) {
     }
   }, [fetchItems])
 
-  // executa uma mutação contra a API (sem otimismo — já aplicado por quem chama)
+  useEffect(() => {
+    if (online) fetchItems()
+  }, [online, fetchItems])
+
   const runMutation = useCallback(async (m: QueuedMutation): Promise<boolean> => {
     try {
       if (m.kind === 'add') {
@@ -86,7 +100,6 @@ export function useListSync(listId: string) {
     }
   }, [])
 
-  // tenta enviar uma mutação agora; se offline ou falhar, enfileira
   const dispatch = useCallback(async (m: QueuedMutation, rollback: () => void) => {
     if (!navigator.onLine) {
       queueRef.current.push(m)
@@ -104,7 +117,6 @@ export function useListSync(listId: string) {
     }
   }, [runMutation, fetchItems, toast])
 
-  // flush da fila ao reconectar / sincronizar
   const flushQueue = useCallback(async () => {
     if (flushingRef.current || queueRef.current.length === 0 || !navigator.onLine) return
     flushingRef.current = true
@@ -135,8 +147,6 @@ export function useListSync(listId: string) {
   const setEditing = useCallback((editing: boolean) => {
     editingRef.current = editing
   }, [])
-
-  // ---- API otimista para os componentes ----
 
   const addItem = useCallback((name: string, quantity: string) => {
     if (!name.trim()) return
@@ -189,7 +199,7 @@ export function useListSync(listId: string) {
   }, [dispatch])
 
   return {
-    items, status, lastSyncedAt, online,
+    items, status, lastSyncedAt, online, externalChanges,
     syncNow, setEditing,
     addItem, updateItem, deleteItem, clearChecked,
   }

@@ -18,19 +18,21 @@ async function canAccessItem(itemId: string, userId: string): Promise<boolean> {
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const user = getUserFromCookies()
+  const user = await getUserFromCookies()
   if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
 
-  if (!(await canAccessItem(params.id, user.userId))) {
+  const { id } = await params
+
+  if (!(await canAccessItem(id, user.userId))) {
     return NextResponse.json({ error: 'Item não encontrado.' }, { status: 404 })
   }
 
   const db = getDb()
   const result = await db.execute({
     sql: 'SELECT photo_base64 FROM items WHERE id = ?',
-    args: [params.id],
+    args: [id],
   })
   if (result.rows.length === 0) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })

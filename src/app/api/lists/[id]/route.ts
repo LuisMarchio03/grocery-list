@@ -16,19 +16,21 @@ async function canAccessList(listId: string, userId: string): Promise<boolean> {
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const user = getUserFromCookies()
+  const user = await getUserFromCookies()
   if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
 
-  if (!(await canAccessList(params.id, user.userId))) {
+  const { id } = await params
+
+  if (!(await canAccessList(id, user.userId))) {
     return NextResponse.json({ error: 'Lista não encontrada.' }, { status: 404 })
   }
 
   const db = getDb()
   const result = await db.execute({
     sql: 'SELECT * FROM lists WHERE id = ?',
-    args: [params.id],
+    args: [id],
   })
   if (result.rows.length === 0) {
     return NextResponse.json({ error: 'List not found' }, { status: 404 })
@@ -38,12 +40,14 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const user = getUserFromCookies()
+  const user = await getUserFromCookies()
   if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
 
-  if (!(await canAccessList(params.id, user.userId))) {
+  const { id } = await params
+
+  if (!(await canAccessList(id, user.userId))) {
     return NextResponse.json({ error: 'Lista não encontrada.' }, { status: 404 })
   }
 
@@ -51,26 +55,28 @@ export async function PUT(
   const { name } = await request.json()
   await db.execute({
     sql: 'UPDATE lists SET name = ? WHERE id = ?',
-    args: [name, params.id],
+    args: [name, id],
   })
   return NextResponse.json({ success: true })
 }
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const user = getUserFromCookies()
+  const user = await getUserFromCookies()
   if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
 
-  if (!(await canAccessList(params.id, user.userId))) {
+  const { id } = await params
+
+  if (!(await canAccessList(id, user.userId))) {
     return NextResponse.json({ error: 'Lista não encontrada.' }, { status: 404 })
   }
 
   const db = getDb()
   await db.execute({
     sql: 'DELETE FROM lists WHERE id = ?',
-    args: [params.id],
+    args: [id],
   })
   return NextResponse.json({ success: true })
 }

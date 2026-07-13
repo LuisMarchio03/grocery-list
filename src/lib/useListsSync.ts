@@ -12,10 +12,12 @@ export function useListsSync() {
   const [lists, setLists] = useState<ListRow[]>([])
   const [status, setStatus] = useState<SyncStatusValue>('idle')
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null)
+  const [externalChanges, setExternalChanges] = useState(false)
   const online = useOnlineStatus()
   const toast = useToast()
   const pendingCount = useRef(0)
   const listsRef = useRef<ListRow[]>([])
+  const externalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   listsRef.current = lists
 
   const fetchLists = useCallback(async (manual = false) => {
@@ -24,7 +26,16 @@ export function useListsSync() {
     try {
       const res = await fetch('/api/lists')
       if (!res.ok) throw new Error('fetch failed')
-      setLists(await res.json())
+      const remote: ListRow[] = await res.json()
+      const prevIds = new Set(listsRef.current.map(l => l.id))
+      const hasNew = remote.some(l => !prevIds.has(l.id) && !l.id.startsWith('temp-'))
+      const hasRemoved = listsRef.current.some(l => !remote.find(r => r.id === l.id) && !l.id.startsWith('temp-'))
+      if (hasNew || hasRemoved) {
+        setExternalChanges(true)
+        if (externalTimerRef.current) clearTimeout(externalTimerRef.current)
+        externalTimerRef.current = setTimeout(() => setExternalChanges(false), 2000)
+      }
+      setLists(remote)
       setLastSyncedAt(Date.now())
       setStatus('synced')
     } catch {
@@ -99,5 +110,5 @@ export function useListsSync() {
 
   const syncNow = useCallback(() => fetchLists(true), [fetchLists])
 
-  return { lists, status, lastSyncedAt, online, syncNow, createList, renameList, deleteList }
+  return { lists, status, lastSyncedAt, online, externalChanges, syncNow, createList, renameList, deleteList }
 }
