@@ -1,4 +1,4 @@
-const CACHE = 'lista-compras-v1'
+const CACHE = 'grocery-list-v1'
 
 const PRECACHE_URLS = [
   '/',

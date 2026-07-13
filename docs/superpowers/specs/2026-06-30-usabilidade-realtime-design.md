@@ -1,7 +1,7 @@
 # Design — Melhorias de usabilidade + sincronização em tempo real
 
 Data: 2026-06-30
-App: `lista-compras` (Next.js 14 App Router, libsql/Turso, Tailwind)
+App: `grocery-list` / `Lista de Compras` (Next.js 14 App Router, libsql/Turso, Tailwind)
 
 ## Contexto
 
