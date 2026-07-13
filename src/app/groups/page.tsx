@@ -159,11 +159,11 @@ export default function GroupsPage() {
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => router.push('/')}
-          className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-all"
+          className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 transition-all"
         >
           <ArrowLeft size={18} />
         </button>
-        <h1 className="text-xl font-semibold text-slate-900">Grupos</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Grupos</h1>
       </div>
 
       <div className="flex gap-2 mb-6">
@@ -178,7 +178,7 @@ export default function GroupsPage() {
         </div>
         <button
           disabled={creating}
-          className="h-11 w-11 flex items-center justify-center rounded-xl bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 active:scale-95 transition-all disabled:opacity-50 shadow-sm shadow-blue-200"
+          className="h-11 w-11 flex items-center justify-center rounded-xl bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 active:bg-blue-800 dark:active:bg-blue-700 active:scale-95 transition-all disabled:opacity-50 shadow-sm shadow-blue-200 dark:shadow-none"
           onClick={handleCreate}
         >
           <Plus size={20} />
@@ -186,7 +186,7 @@ export default function GroupsPage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-400 text-center py-8">Carregando...</p>
+        <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-8">Carregando...</p>
       ) : groups.length === 0 ? (
         <EmptyState message="Nenhum grupo ainda. Crie um acima!" />
       ) : (
@@ -198,26 +198,26 @@ export default function GroupsPage() {
             const isExpanded = expandedGroup === group.id
 
             return (
-              <div key={group.id} className="bg-white rounded-xl border border-slate-100 shadow-sm transition-all">
+              <div key={group.id} className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700/50 shadow-sm dark:shadow-slate-900/30 transition-all">
                 <button
                   className="w-full px-4 py-3.5 flex items-center gap-3 text-left"
                   onClick={() => toggleExpand(group.id)}
                 >
-                  <div className="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
-                    <Users size={16} className="text-indigo-600" />
+                  <div className="w-9 h-9 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
+                    <Users size={16} className="text-indigo-600 dark:text-indigo-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900 truncate">{group.name}</p>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{group.name}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                       {group.member_count} {group.member_count === 1 ? 'membro' : 'membros'}
-                      {isOwner && <span className="ml-2 text-indigo-500">· Dono</span>}
+                      {isOwner && <span className="ml-2 text-indigo-500 dark:text-indigo-400">· Dono</span>}
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
                     {isOwner && (
                       <button
                         onClick={e => { e.stopPropagation(); setDeleteTarget(group) }}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                         title="Excluir grupo"
                       >
                         <Trash2 size={14} />
@@ -225,7 +225,7 @@ export default function GroupsPage() {
                     )}
                     <button
                       className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
-                        isExpanded ? 'bg-blue-100 text-blue-600' : 'text-slate-400 hover:bg-slate-100'
+                        isExpanded ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
                       }`}
                     >
                       <svg
@@ -239,7 +239,7 @@ export default function GroupsPage() {
                 </button>
 
                 {isExpanded && (
-                  <div className="px-4 pb-4 border-t border-slate-100 animate-fade-in">
+                  <div className="px-4 pb-4 border-t border-slate-100 dark:border-slate-700/50 animate-fade-in">
                     {isOwner && (
                       <div className="flex gap-2 mt-3">
                         <input
@@ -251,7 +251,7 @@ export default function GroupsPage() {
                         />
                         <button
                           disabled={addingMember || !addMemberUsername.trim()}
-                          className="h-9 w-9 flex items-center justify-center rounded-lg bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-50"
+                          className="h-9 w-9 flex items-center justify-center rounded-lg bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 active:scale-95 transition-all disabled:opacity-50"
                           onClick={() => handleAddMember(group.id)}
                         >
                           <UserPlus size={16} />
@@ -261,21 +261,21 @@ export default function GroupsPage() {
 
                     <div className="mt-3 space-y-1">
                       {group.created_by === user?.userId && (
-                        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-indigo-50">
+                        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
                           <div className="flex items-center gap-2">
-                            <Users size={14} className="text-indigo-500" />
-                            <span className="text-sm text-indigo-700 font-medium">{user?.username}</span>
+                            <Users size={14} className="text-indigo-500 dark:text-indigo-400" />
+                            <span className="text-sm text-indigo-700 dark:text-indigo-300 font-medium">{user?.username}</span>
                           </div>
-                          <span className="text-xs text-indigo-400 font-medium">Dono</span>
+                          <span className="text-xs text-indigo-400 dark:text-indigo-300 font-medium">Dono</span>
                         </div>
                       )}
                       {members.map((member: GroupMember) => (
-                        <div key={member.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">
-                          <span className="text-sm text-slate-700">{member.username}</span>
+                        <div key={member.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                          <span className="text-sm text-slate-700 dark:text-slate-300">{member.username}</span>
                           {isOwner && (
                             <button
                               onClick={() => handleRemoveMember(group.id, member.id, member.username)}
-                              className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                              className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                               title="Remover membro"
                             >
                               <UserX size={14} />

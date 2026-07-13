@@ -4,9 +4,9 @@ import { useToast } from '@/lib/ToastContext'
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react'
 
 const styles = {
-  success: { icon: CheckCircle2, cls: 'border-emerald-200 bg-emerald-50 text-emerald-800' },
-  error: { icon: AlertCircle, cls: 'border-red-200 bg-red-50 text-red-800' },
-  info: { icon: Info, cls: 'border-blue-200 bg-blue-50 text-blue-800' },
+  success: { icon: CheckCircle2, cls: 'border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300' },
+  error: { icon: AlertCircle, cls: 'border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300' },
+  info: { icon: Info, cls: 'border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300' },
 }
 
 export default function Toaster() {

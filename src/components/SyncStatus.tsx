@@ -46,7 +46,7 @@ export default function SyncStatus({ status, lastSyncedAt, online, onSync }: Pro
     <button
       onClick={onSync}
       title="Sincronizar agora"
-      className={`flex items-center gap-1.5 text-xs ${color} hover:text-slate-700 transition-colors active:scale-95`}
+      className={`flex items-center gap-1.5 text-xs ${color} dark:opacity-90 hover:text-slate-700 dark:hover:text-slate-300 transition-colors active:scale-95`}
     >
       <Icon size={14} className={status === 'syncing' ? 'animate-spin' : ''} />
       <span className="whitespace-nowrap">{label}</span>

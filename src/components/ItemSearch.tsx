@@ -7,9 +7,9 @@ type Props = { value: string; onChange: (v: string) => void }
 export default function ItemSearch({ value, onChange }: Props) {
   return (
     <div className="relative mb-4">
-      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
       <input
-        className="w-full h-10 pl-9 pr-9 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+        className="w-full h-10 pl-9 pr-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
         placeholder="Buscar item..."
         value={value}
         onChange={e => onChange(e.target.value)}
@@ -17,7 +17,7 @@ export default function ItemSearch({ value, onChange }: Props) {
       {value && (
         <button
           onClick={() => onChange('')}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
         >
           <X size={16} />
         </button>

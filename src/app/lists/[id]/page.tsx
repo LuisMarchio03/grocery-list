@@ -112,7 +112,7 @@ export default function ListPage() {
         <div className="flex-1 min-w-0">
           <PageHeader title={listName} backTo="/" />
           {listGroup && (
-            <p className="text-xs text-blue-500 flex items-center gap-1 mt-0.5 ml-10">
+            <p className="text-xs text-blue-500 dark:text-blue-400 flex items-center gap-1 mt-0.5 ml-10">
               <Users size={10} /> Compartilhada com {listGroup}
             </p>
           )}
@@ -125,7 +125,7 @@ export default function ListPage() {
         {totalChecked > 0 && (
           <button
             onClick={() => setClearOpen(true)}
-            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-red-500 transition-colors active:scale-95"
+            className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors active:scale-95"
           >
             <Trash2 size={14} /> Limpar comprados
           </button>
@@ -152,8 +152,8 @@ export default function ListPage() {
         ))}
 
         {checked.length > 0 && (
-          <div className="pt-4 border-t border-slate-100">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-3 px-1">
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-700/50">
+            <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3 px-1">
               Comprados ({checked.length})
             </p>
             <div className="space-y-2">
@@ -205,21 +205,21 @@ function EditInline({
   onSave: () => void; onCancel: () => void
 }) {
   return (
-    <div className="bg-white rounded-xl border border-blue-200 shadow-sm px-4 py-3 flex gap-2 items-center animate-fade-in">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-blue-200 dark:border-blue-900 shadow-sm px-4 py-3 flex gap-2 items-center animate-fade-in">
       <input
-        className="flex-1 h-9 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+        className="flex-1 h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
         value={name}
         onChange={e => onNameChange(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') onSave(); if (e.key === 'Escape') onCancel() }}
         autoFocus
       />
       <input
-        className="w-16 h-9 px-2 rounded-lg border border-slate-200 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+        className="w-16 h-9 px-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
         value={qty}
         onChange={e => onQtyChange(e.target.value)}
       />
       <button
-        className="h-9 px-3 rounded-lg bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 active:scale-95 transition-all"
+        className="h-9 px-3 rounded-lg bg-emerald-500 dark:bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-600 dark:hover:bg-emerald-700 active:scale-95 transition-all"
         onClick={onSave}
       >
         OK
