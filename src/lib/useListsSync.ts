@@ -6,7 +6,7 @@ import type { SyncStatusValue } from '@/lib/sync/types'
 import { useOnlineStatus } from '@/lib/useOnlineStatus'
 import { useToast } from '@/lib/ToastContext'
 
-export type ListRow = { id: string; name: string; created_at: string; item_count: number }
+export type ListRow = { id: string; name: string; created_at: string; item_count: number; group_id?: string | null; group_name?: string | null }
 
 export function useListsSync() {
   const [lists, setLists] = useState<ListRow[]>([])
@@ -59,16 +59,16 @@ export function useListsSync() {
     fetchLists()
   }, [fetchLists, toast])
 
-  const createList = useCallback((name: string) => {
+  const createList = useCallback((name: string, groupId?: string) => {
     const trimmed = name.trim()
     if (!trimmed) return
     const tempId = `temp-${crypto.randomUUID()}`
     const snapshot = listsRef.current
-    setLists(prev => [{ id: tempId, name: trimmed, created_at: new Date().toISOString(), item_count: 0 }, ...prev])
+    setLists(prev => [{ id: tempId, name: trimmed, created_at: new Date().toISOString(), item_count: 0, group_id: groupId }, ...prev])
     mutate(
       () => fetch('/api/lists', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: trimmed }),
+        body: JSON.stringify({ name: trimmed, group_id: groupId }),
       }),
       () => setLists(snapshot),
     )

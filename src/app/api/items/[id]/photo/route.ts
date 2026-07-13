@@ -1,15 +1,39 @@
 import getDb from '@/lib/db'
+import { getUserFromCookies } from '@/lib/auth'
 import { NextResponse } from 'next/server'
+
+async function canAccessItem(itemId: string, userId: string): Promise<boolean> {
+  const db = getDb()
+  const result = await db.execute({
+    sql: `SELECT i.id FROM items i
+     JOIN lists l ON l.id = i.list_id
+     WHERE i.id = ? AND (
+       l.created_by = ? OR
+       l.group_id IN (SELECT group_id FROM group_members WHERE user_id = ?)
+     )`,
+    args: [itemId, userId, userId],
+  })
+  return result.rows.length > 0
+}
 
 export async function GET(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
+  const user = getUserFromCookies()
+  if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+
+  if (!(await canAccessItem(params.id, user.userId))) {
+    return NextResponse.json({ error: 'Item não encontrado.' }, { status: 404 })
+  }
+
   const db = getDb()
   const result = await db.execute({
     sql: 'SELECT photo_base64 FROM items WHERE id = ?',
     args: [params.id],
   })
-  const photo = result.rows.length ? (result.rows[0].photo_base64 as string) : ''
-  return NextResponse.json({ photo_base64: photo || '' })
+  if (result.rows.length === 0) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+  return NextResponse.json(result.rows[0])
 }

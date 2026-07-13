@@ -1,27 +1,42 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, Trash2, ShoppingBag, Check } from 'lucide-react'
+import { Plus, Pencil, Trash2, ShoppingBag, Check, Users, LogOut, User, ChevronDown } from 'lucide-react'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import EmptyState from '@/components/EmptyState'
 import AccessibilityBar from '@/components/AccessibilityBar'
 import SyncStatus from '@/components/SyncStatus'
 import OfflineBanner from '@/components/OfflineBanner'
 import { useListsSync, type ListRow } from '@/lib/useListsSync'
+import { useAuth } from '@/lib/AuthContext'
+
+type GroupOption = { id: string; name: string }
 
 export default function Home() {
   const { lists, status, lastSyncedAt, online, syncNow, createList, renameList, deleteList } = useListsSync()
+  const { user, logout } = useAuth()
   const [newName, setNewName] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<ListRow | null>(null)
+  const [groups, setGroups] = useState<GroupOption[]>([])
+  const [selectedGroup, setSelectedGroup] = useState<string>('')
+  const [showGroupPicker, setShowGroupPicker] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    fetch('/api/groups').then(r => r.ok && r.json()).then(data => {
+      if (data) setGroups(data)
+    })
+  }, [])
 
   function handleCreate() {
     if (!newName.trim()) return
-    createList(newName)
+    createList(newName, selectedGroup || undefined)
     setNewName('')
+    setSelectedGroup('')
+    setShowGroupPicker(false)
   }
 
   function handleRename(id: string) {
@@ -44,29 +59,87 @@ export default function Home() {
         <AccessibilityBar />
       </div>
 
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2 text-sm text-slate-500">
+          <User size={14} />
+          <span>{user?.username}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => router.push('/groups')}
+            className="text-xs flex items-center gap-1.5 text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 hover:bg-slate-200 rounded-lg px-3 py-1.5"
+          >
+            <Users size={14} /> Grupos
+          </button>
+          <button
+            onClick={logout}
+            className="text-xs flex items-center gap-1.5 text-slate-400 hover:text-red-500 transition-colors bg-slate-100 hover:bg-red-50 rounded-lg px-3 py-1.5"
+          >
+            <LogOut size={14} /> Sair
+          </button>
+        </div>
+      </div>
+
       <div className="mb-5">
         <SyncStatus status={status} lastSyncedAt={lastSyncedAt} online={online} onSync={syncNow} />
       </div>
 
       <OfflineBanner online={online} />
 
-      <div className="flex gap-2 mb-6">
-        <div className="flex-1 relative">
-          <input
-            className="w-full h-11 pl-4 pr-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            placeholder="Nova lista..."
-            value={newName}
-            onChange={e => setNewName(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleCreate()}
-            autoFocus
-          />
+      <div className="mb-6">
+        <div className="flex gap-2">
+          <div className="flex-1 relative">
+            <input
+              className="w-full h-11 pl-4 pr-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              placeholder="Nova lista..."
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleCreate()}
+              autoFocus
+            />
+          </div>
+          <button
+            className="h-11 w-11 flex items-center justify-center rounded-xl bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 active:scale-95 transition-all shadow-sm shadow-blue-200"
+            onClick={handleCreate}
+          >
+            <Plus size={20} />
+          </button>
         </div>
-        <button
-          className="h-11 w-11 flex items-center justify-center rounded-xl bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 active:scale-95 transition-all shadow-sm shadow-blue-200"
-          onClick={handleCreate}
-        >
-          <Plus size={20} />
-        </button>
+
+        {groups.length > 0 && (
+          <div className="mt-2 relative">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors px-1 py-1"
+              onClick={() => setShowGroupPicker(!showGroupPicker)}
+            >
+              <Users size={12} />
+              {selectedGroup ? groups.find(g => g.id === selectedGroup)?.name : 'Lista privada'}
+              <ChevronDown size={12} />
+            </button>
+            {showGroupPicker && (
+              <div className="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-10 py-1 min-w-[160px] animate-fade-in">
+                <button
+                  className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 ${!selectedGroup ? 'text-blue-600 bg-blue-50' : 'text-slate-700 hover:bg-slate-50'}`}
+                  onClick={() => { setSelectedGroup(''); setShowGroupPicker(false) }}
+                >
+                  <User size={14} />
+                  Privada
+                </button>
+                {groups.map(g => (
+                  <button
+                    key={g.id}
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 ${selectedGroup === g.id ? 'text-blue-600 bg-blue-50' : 'text-slate-700 hover:bg-slate-50'}`}
+                    onClick={() => { setSelectedGroup(g.id); setShowGroupPicker(false) }}
+                  >
+                    <Users size={14} />
+                    {g.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -97,6 +170,11 @@ export default function Home() {
                 <p className="text-sm font-medium text-slate-900 truncate">{list.name}</p>
                 <p className="text-xs text-slate-400 mt-0.5">
                   {list.item_count} {list.item_count === 1 ? 'item' : 'itens'} · {formatDate(list.created_at)}
+                  {list.group_name && (
+                    <span className="ml-2 inline-flex items-center gap-1 text-blue-500">
+                      <Users size={10} /> {list.group_name}
+                    </span>
+                  )}
                 </p>
               </div>
             )}

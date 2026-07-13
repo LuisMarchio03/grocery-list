@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Users } from 'lucide-react'
 import PageHeader from '@/components/PageHeader'
 import AddItemForm from '@/components/AddItemForm'
 import ItemCard from '@/components/ItemCard'
@@ -27,6 +27,7 @@ export default function ListPage() {
   } = useListSync(id)
 
   const [listName, setListName] = useState('')
+  const [listGroup, setListGroup] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editQty, setEditQty] = useState('')
@@ -36,7 +37,10 @@ export default function ListPage() {
   const [query, setQuery] = useState('')
 
   useEffect(() => {
-    fetch(`/api/lists/${id}`).then(r => r.json()).then(d => setListName(d.name))
+    fetch(`/api/lists/${id}`).then(r => r.json()).then(d => {
+      setListName(d.name)
+      setListGroup(d.group_name || null)
+    })
   }, [id])
 
   useEffect(() => { setEditing(editingId !== null) }, [editingId, setEditing])
@@ -107,6 +111,11 @@ export default function ListPage() {
       <div className="flex items-center gap-3 mb-2">
         <div className="flex-1 min-w-0">
           <PageHeader title={listName} backTo="/" />
+          {listGroup && (
+            <p className="text-xs text-blue-500 flex items-center gap-1 mt-0.5 ml-10">
+              <Users size={10} /> Compartilhada com {listGroup}
+            </p>
+          )}
         </div>
         <AccessibilityBar />
       </div>
