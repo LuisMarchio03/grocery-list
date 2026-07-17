@@ -85,15 +85,15 @@ export function useListsSync() {
     )
   }, [mutate])
 
-  const renameList = useCallback((id: string, name: string) => {
+  const updateList = useCallback((id: string, name: string, groupId?: string | null) => {
     const trimmed = name.trim()
     if (!trimmed) return
     const snapshot = listsRef.current
-    setLists(prev => prev.map(l => (l.id === id ? { ...l, name: trimmed } : l)))
+    setLists(prev => prev.map(l => (l.id === id ? { ...l, name: trimmed, group_id: groupId ?? l.group_id } : l)))
     mutate(
       () => fetch(`/api/lists/${id}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: trimmed }),
+        body: JSON.stringify({ name: trimmed, ...(groupId !== undefined ? { group_id: groupId } : {}) }),
       }),
       () => setLists(snapshot),
     )
@@ -110,5 +110,5 @@ export function useListsSync() {
 
   const syncNow = useCallback(() => fetchLists(true), [fetchLists])
 
-  return { lists, status, lastSyncedAt, online, externalChanges, syncNow, createList, renameList, deleteList }
+  return { lists, status, lastSyncedAt, online, externalChanges, syncNow, createList, updateList, deleteList }
 }

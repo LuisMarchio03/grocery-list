@@ -52,11 +52,35 @@ export async function PUT(
   }
 
   const db = getDb()
-  const { name } = await request.json()
-  await db.execute({
-    sql: 'UPDATE lists SET name = ? WHERE id = ?',
-    args: [name, id],
-  })
+  const { name, group_id } = await request.json()
+
+  if (group_id !== undefined) {
+    if (group_id) {
+      const isMember = await db.execute({
+        sql: 'SELECT id FROM group_members WHERE group_id = ? AND user_id = ?',
+        args: [group_id, user.userId],
+      })
+      if (isMember.rows.length === 0) {
+        const isOwner = await db.execute({
+          sql: 'SELECT id FROM groups WHERE id = ? AND created_by = ?',
+          args: [group_id, user.userId],
+        })
+        if (isOwner.rows.length === 0) {
+          return NextResponse.json({ error: 'Você não é membro deste grupo.' }, { status: 403 })
+        }
+      }
+    }
+    await db.execute({
+      sql: 'UPDATE lists SET name = ?, group_id = ? WHERE id = ?',
+      args: [name, group_id || null, id],
+    })
+  } else {
+    await db.execute({
+      sql: 'UPDATE lists SET name = ? WHERE id = ?',
+      args: [name, id],
+    })
+  }
+
   return NextResponse.json({ success: true })
 }
 

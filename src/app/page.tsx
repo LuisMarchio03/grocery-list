@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Pencil, Trash2, ShoppingBag, Check, Users, LogOut, User, ChevronDown, RefreshCw } from 'lucide-react'
+import { Pencil, Trash2, ShoppingBag, Check, Users, LogOut, User, ChevronDown, RefreshCw, X } from 'lucide-react'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import EmptyState from '@/components/EmptyState'
 import IconButton from '@/components/IconButton'
@@ -17,7 +17,7 @@ import { useAuth } from '@/lib/AuthContext'
 type GroupOption = { id: string; name: string }
 
 export default function Home() {
-  const { lists, status, lastSyncedAt, online, externalChanges, syncNow, createList, renameList, deleteList } = useListsSync()
+  const { lists, status, lastSyncedAt, online, externalChanges, syncNow, createList, updateList, deleteList } = useListsSync()
   // lastSyncedAt só é preenchido após um fetch bem-sucedido (useListsSync.ts:39),
   // então null == nenhum carregamento completou. Em erro/offline mostramos o
   // estado real em vez de um skeleton eterno.
@@ -27,9 +27,11 @@ export default function Home() {
   const [newName, setNewName] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
+  const [editGroupId, setEditGroupId] = useState<string | null | undefined>(undefined)
   const [deleteTarget, setDeleteTarget] = useState<ListRow | null>(null)
   const [groups, setGroups] = useState<GroupOption[]>([])
   const [showGroupPicker, setShowGroupPicker] = useState(false)
+  const [showEditGroupPicker, setShowEditGroupPicker] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -51,10 +53,17 @@ export default function Home() {
     setShowGroupPicker(false)
   }
 
-  function handleRename(id: string) {
+  function handleSaveEdit(id: string) {
     if (!editName.trim()) return
-    renameList(id, editName)
+    updateList(id, editName, editGroupId)
+    cancelEdit()
+  }
+
+  function cancelEdit() {
     setEditingId(null)
+    setEditName('')
+    setEditGroupId(undefined)
+    setShowEditGroupPicker(false)
   }
 
   function formatDate(iso: string) {
@@ -168,62 +177,117 @@ export default function Home() {
         <ListSkeleton />
       ) : (
       <div className="space-y-2">
-        {lists.map(list => (
+        {lists.map(list => {
+          const editing = editingId === list.id
+          return (
           <div
             key={list.id}
-            /* animate-fade-in (só opacity) em vez de animate-slide-up: a entrada
-               continua suave, mas não anima translateY — que movia o box e fazia o
-               teste de alvo de toque medir mid-animação e falhar de forma intermitente. */
-            className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700/50 shadow-sm dark:shadow-slate-900/30 px-4 py-3.5 flex items-center gap-3 transition-all duration-200 hover:border-slate-200 dark:hover:border-slate-600 active:scale-[0.98] animate-fade-in"
+            className={`bg-white dark:bg-slate-800 rounded-xl border shadow-sm dark:shadow-slate-900/30 px-4 transition-all duration-200 animate-fade-in ${
+              editing
+                ? 'border-blue-200 dark:border-blue-800 py-4'
+                : 'border-slate-100 dark:border-slate-700/50 py-3.5 hover:border-slate-200 dark:hover:border-slate-600 active:scale-[0.98]'
+            }`}
           >
-            {editingId === list.id ? (
-              <div className="flex gap-2 flex-1 items-center">
-                <input
-                  className="flex-1 h-9 px-3 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                  value={editName}
-                  onChange={e => setEditName(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') handleRename(list.id); if (e.key === 'Escape') setEditingId(null) }}
-                  autoFocus
-                />
-                <IconButton
-                  icon={<Check className="w-4 h-4" />}
-                  label="Confirmar novo nome"
-                  variant="primary"
-                  onClick={() => handleRename(list.id)}
-                  className="shrink-0"
-                />
+            {editing ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <input
+                    className="flex-1 h-10 px-3 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') handleSaveEdit(list.id); if (e.key === 'Escape') cancelEdit() }}
+                    autoFocus
+                  />
+                  <IconButton
+                    icon={<Check className="w-5 h-5" />}
+                    label="Salvar alterações"
+                    variant="primary"
+                    onClick={() => handleSaveEdit(list.id)}
+                  />
+                  <IconButton
+                    icon={<X className="w-5 h-5" />}
+                    label="Cancelar edição"
+                    onClick={cancelEdit}
+                  />
+                </div>
+
+                <div className="relative">
+                  <button
+                    onClick={() => setShowEditGroupPicker(!showEditGroupPicker)}
+                    className="w-full min-h-[max(2.5rem,44px)] flex items-center justify-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                    aria-expanded={showEditGroupPicker}
+                    aria-haspopup="listbox"
+                  >
+                    {editGroupId === null ? <User className="w-4 h-4" /> : <Users className="w-4 h-4" />}
+                    {editGroupId ? groups.find(g => g.id === editGroupId)?.name || 'Carregando...' : 'Lista privada'}
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                  {showEditGroupPicker && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg dark:shadow-slate-900/50 z-10 py-1 animate-fade-in">
+                      <button
+                        className={`w-full text-left px-3 min-h-[max(2.5rem,44px)] text-sm transition-colors flex items-center gap-2 ${editGroupId === null ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+                        onClick={() => { setEditGroupId(null); setShowEditGroupPicker(false) }}
+                      >
+                        <User className="w-4 h-4" /> Privada
+                      </button>
+                      {groups.map(g => (
+                        <button
+                          key={g.id}
+                          className={`w-full text-left px-3 min-h-[max(2.5rem,44px)] text-sm transition-colors flex items-center gap-2 ${editGroupId === g.id ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+                          onClick={() => { setEditGroupId(g.id); setShowEditGroupPicker(false) }}
+                        >
+                          <Users className="w-4 h-4" /> {g.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end">
+                  <IconButton
+                    icon={<Trash2 className="w-4 h-4" />}
+                    label={`Excluir lista ${list.name}`}
+                    variant="danger"
+                    onClick={() => { cancelEdit(); setDeleteTarget(list) }}
+                  />
+                </div>
               </div>
             ) : (
-              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => router.push(`/lists/${list.id}`)}>
-                <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{list.name}</p>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                  {list.item_count} {list.item_count === 1 ? 'item' : 'itens'} · {formatDate(list.created_at)}
-                  {list.group_name && (
-                    <span className="ml-2 inline-flex items-center gap-1 text-blue-500 dark:text-blue-400">
-                      <Users size={10} /> {list.group_name}
-                    </span>
-                  )}
-                </p>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => router.push(`/lists/${list.id}`)}>
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{list.name}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                    {list.item_count} {list.item_count === 1 ? 'item' : 'itens'} · {formatDate(list.created_at)}
+                    {list.group_name ? (
+                      <span className="ml-2 inline-flex items-center gap-1 text-blue-500 dark:text-blue-400">
+                        <Users size={10} /> {list.group_name}
+                      </span>
+                    ) : (
+                      <span className="ml-2 inline-flex items-center gap-1 text-slate-400">
+                        <User size={10} /> Privada
+                      </span>
+                    )}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1 shrink-0">
+                  <IconButton
+                    icon={<Pencil className="w-4 h-4" />}
+                    label={`Editar lista ${list.name}`}
+                    onClick={() => { setEditingId(list.id); setEditName(list.name); setEditGroupId(list.group_id ?? null) }}
+                  />
+                  <IconButton
+                    icon={<Trash2 className="w-4 h-4" />}
+                    label={`Excluir lista ${list.name}`}
+                    variant="danger"
+                    onClick={() => setDeleteTarget(list)}
+                  />
+                </div>
               </div>
             )}
-
-            <div className="flex items-center gap-1 shrink-0">
-              <IconButton
-                icon={<Pencil className="w-4 h-4" />}
-                label={`Renomear lista ${list.name}`}
-                onClick={() => { setEditingId(list.id); setEditName(list.name) }}
-                className="shrink-0"
-              />
-              <IconButton
-                icon={<Trash2 className="w-4 h-4" />}
-                label={`Excluir lista ${list.name}`}
-                variant="danger"
-                onClick={() => setDeleteTarget(list)}
-                className="shrink-0"
-              />
-            </div>
           </div>
-        ))}
+          )
+        })}
 
         {lists.length === 0 && (
           <EmptyState message="Nenhuma lista ainda. Crie uma acima!" />
