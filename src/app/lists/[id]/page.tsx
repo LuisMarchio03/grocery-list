@@ -9,7 +9,7 @@ import ItemCard from '@/components/ItemCard'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import EmptyState from '@/components/EmptyState'
 import ImageViewer from '@/components/ImageViewer'
-import AccessibilityBar from '@/components/AccessibilityBar'
+import SettingsMenu from '@/components/SettingsMenu'
 import SyncStatus from '@/components/SyncStatus'
 import OfflineBanner from '@/components/OfflineBanner'
 import ListProgress from '@/components/ListProgress'
@@ -117,7 +117,7 @@ export default function ListPage() {
       {ptr.pulling && (
         <div className="flex justify-center items-center h-16 -mt-4 mb-2 transition-all" style={{ opacity: Math.min(ptr.pullDistance / 80, 1) }}>
           <div className="flex items-center gap-2 text-xs text-blue-500 dark:text-blue-400 font-medium">
-            <RefreshCw size={14} className={ptr.pullDistance >= 80 ? 'animate-spin' : ''} />
+            <RefreshCw className={`w-4 h-4 ${ptr.pullDistance >= 80 ? 'animate-spin' : ''}`} />
             {ptr.pullDistance >= 80 ? 'Solte para atualizar' : 'Puxe para atualizar'}
           </div>
         </div>
@@ -127,11 +127,11 @@ export default function ListPage() {
           <PageHeader title={listName} backTo="/" />
           {listGroup && (
             <p className="text-xs text-blue-500 dark:text-blue-400 flex items-center gap-1 mt-0.5 ml-10">
-              <Users size={10} /> Compartilhada com {listGroup}
+              <Users className="w-3 h-3" /> Compartilhada com {listGroup}
             </p>
           )}
         </div>
-        <AccessibilityBar />
+        <SettingsMenu />
       </div>
 
       <div className="flex items-center justify-between mb-5">
@@ -139,9 +139,9 @@ export default function ListPage() {
         {totalChecked > 0 && (
           <button
             onClick={() => setClearOpen(true)}
-            className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors active:scale-95"
+            className="min-h-[max(2.75rem,44px)] px-2 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors active:scale-95"
           >
-            <Trash2 size={14} /> Limpar comprados
+            <Trash2 className="w-4 h-4" /> Limpar comprados
           </button>
         )}
       </div>
@@ -233,7 +233,7 @@ function EditInline({
         onChange={e => onQtyChange(e.target.value)}
       />
       <button
-        className="h-9 px-3 rounded-lg bg-emerald-500 dark:bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-600 dark:hover:bg-emerald-700 active:scale-95 transition-all"
+        className="min-h-[max(2.75rem,44px)] px-3 rounded-lg bg-emerald-500 dark:bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-600 dark:hover:bg-emerald-700 active:scale-95 transition-all"
         onClick={onSave}
       >
         OK

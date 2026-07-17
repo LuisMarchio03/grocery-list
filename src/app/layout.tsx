@@ -30,11 +30,32 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+        <script
+          // Bloqueante de propósito: precisa rodar antes do primeiro paint,
+          // senão a página pisca branca e a fonte salta de tamanho.
+          dangerouslySetInnerHTML={{
+            __html: `
+(function () {
+  try {
+    var t = localStorage.getItem('theme');
+    var dark = t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches);
+    if (dark) document.documentElement.classList.add('dark');
+
+    // ESPELHADO de src/lib/FontSizeContext.tsx (que usa multiplicador, não %):
+    // 0.875 -> 87.5, 1 -> 100, 1.125 -> 112.5, 1.25 -> 125. Mudou lá, mude aqui.
+    var scales = { sm: 87.5, md: 100, lg: 112.5, xl: 125 };
+    var s = localStorage.getItem('fontSize');
+    if (s && scales[s]) document.documentElement.style.fontSize = scales[s] + '%';
+  } catch (e) {}
+})();
+            `,
+          }}
+        />
       </head>
       <body>
         <Providers>

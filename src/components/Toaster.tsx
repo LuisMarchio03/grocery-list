@@ -25,8 +25,13 @@ export default function Toaster() {
           >
             <Icon size={18} className="shrink-0" />
             <span className="text-sm flex-1">{t.message}</span>
-            <button onClick={() => dismiss(t.id)} className="shrink-0 opacity-60 hover:opacity-100">
-              <X size={16} />
+            <button
+              onClick={() => dismiss(t.id)}
+              aria-label="Dispensar aviso"
+              title="Dispensar"
+              className="shrink-0 -m-2 p-2 opacity-60 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current rounded"
+            >
+              <X className="w-4 h-4" />
             </button>
           </div>
         )

@@ -17,9 +17,11 @@ export default function ItemSearch({ value, onChange }: Props) {
       {value && (
         <button
           onClick={() => onChange('')}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
+          aria-label="Limpar busca"
+          title="Limpar busca"
+          className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[max(2.75rem,44px)] min-w-[max(2.75rem,44px)] flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg"
         >
-          <X size={16} />
+          <X className="w-4 h-4" />
         </button>
       )}
     </div>

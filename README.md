@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/next.js-14.2-black?style=flat-square&logo=next.js" alt="Next.js 14" />
+  <img src="https://img.shields.io/badge/next.js-16.2-black?style=flat-square&logo=next.js" alt="Next.js 16" />
   <img src="https://img.shields.io/badge/react-18.3-61DAFB?style=flat-square&logo=react" alt="React 18" />
   <img src="https://img.shields.io/badge/typescript-5.4-3178C6?style=flat-square&logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/tailwindcss-3.4-06B6D4?style=flat-square&logo=tailwindcss" alt="Tailwind CSS" />
@@ -80,7 +80,7 @@
       </td>
       <td align="center">
         <strong>♿ Acessibilidade</strong><br />
-        <sub>Ajuste do tamanho da fonte em 4 níveis para melhor legibilidade</sub>
+        <sub>4 níveis de fonte, tema claro/escuro, alvos de toque de 44px e navegação por teclado</sub>
       </td>
     </tr>
   </tbody>
@@ -92,7 +92,7 @@
 
 ```mermaid
 graph TB
-  subgraph "Frontend (Next.js 14)"
+  subgraph "Frontend (Next.js 16)"
     A["pages/home<br/>Minhas Listas"]
     B["pages/lista<br/>[id] • Itens"]
     C["Components<br/>UI Kit"]
@@ -162,7 +162,7 @@ sequenceDiagram
 
 | Categoria | Tecnologia |
 |---|---|
-| **Framework** | [Next.js 14](https://nextjs.org/) (App Router) |
+| **Framework** | [Next.js 16](https://nextjs.org/) (App Router) |
 | **Linguagem** | [TypeScript](https://www.typescriptlang.org/) 5.4+ |
 | **Estilização** | [Tailwind CSS](https://tailwindcss.com/) 3.4+ |
 | **Banco de dados** | [Turso](https://turso.tech/) (libSQL — SQLite serverless) |
@@ -177,7 +177,9 @@ sequenceDiagram
 ### Pré-requisitos
 
 - Node.js 18+
-- Uma conta no [Turso](https://turso.tech/) (gratuita)
+
+Uma conta no [Turso](https://turso.tech/) é necessária apenas para **produção**. Em
+desenvolvimento o app usa um SQLite local automaticamente.
 
 ### Passo a passo
 
@@ -189,20 +191,33 @@ cd grocery-list
 # 2. Instale as dependências
 npm install
 
-# 3. Configure o banco Turso
-turso db create grocery-list
-turso db show grocery-list --url    # copie a URL
-turso db tokens create grocery-list # copie o token
+# 3. Crie o banco local e popule com usuários de teste
+npm run migrate
+npm run seed
 
-# 4. Configure as variáveis de ambiente
-cp .env.example .env.local
-# Edite .env.local com suas credenciais do Turso
-
-# 5. Inicie a aplicação
+# 4. Inicie a aplicação
 npm run dev
 ```
 
 Acesse [http://localhost:3000](http://localhost:3000) 🎉
+
+O `seed` cria os usuários de teste e imprime as senhas no terminal.
+
+### Rodando com Turso (opcional em dev, obrigatório em prod)
+
+```bash
+cp .env.example .env.local
+# preencha TURSO_DATABASE_URL e TURSO_AUTH_TOKEN
+```
+
+Com `TURSO_DATABASE_URL` definida, o app usa o Turso em vez do SQLite local.
+
+### Testes
+
+```bash
+npm test        # Playwright: layout a 360px nos tamanhos de fonte M e XG
+npm run test:ui # modo interativo
+```
 
 <br />
 

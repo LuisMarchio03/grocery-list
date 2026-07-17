@@ -38,12 +38,15 @@ export default function ItemCard({
     >
       {/* Fileira 1: checkbox + nome do produto */}
       <div className="flex items-center gap-3">
-        <input
-          type="checkbox"
-          checked={!!item.is_checked}
-          onChange={onToggleCheck}
-          className="animate-check-bounce"
-        />
+        <label className="relative flex items-center shrink-0 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={!!item.is_checked}
+            onChange={onToggleCheck}
+            aria-label={item.is_checked ? `Desmarcar ${item.name}` : `Marcar ${item.name} como comprado`}
+            className="animate-check-bounce"
+          />
+        </label>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -60,7 +63,7 @@ export default function ItemCard({
               </span>
             )}
             {!!item.is_promotion && (
-              <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-900 px-1.5 py-0.5 rounded-full">
+              <span className="text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-900 px-1.5 py-0.5 rounded-full">
                 PROMO
               </span>
             )}
@@ -68,17 +71,30 @@ export default function ItemCard({
         </div>
       </div>
 
-      {/* Fileira 2: botões de interação — largura total, alvos grandes p/ toque */}
-      <div className="flex items-stretch gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-700/50">
+      {/* Fileira 2: ações.
+          auto-fit + minmax em rem faz o grid refluir pela FONTE, não pela viewport:
+          o mínimo de 4rem engorda junto com a fonte, deixam de caber todas as colunas
+          e o grid quebra sozinho. Breakpoint (sm:/md:) não serviria — ele olha a
+          largura da tela, e aqui quem manda é o tamanho da fonte.
+
+          4rem foi MEDIDO, não chutado: o grid tem só ~286px no md (o px-5 do <main>
+          e o px-4 do card comem as bordas), e esse espaço ENCOLHE conforme a fonte
+          cresce, porque esses paddings também são rem — 295/286/277/268px de sm a xl.
+          Com 4.5rem o card já quebrava em 2 linhas no tamanho padrão. Medido a 360px
+          num item de 4 botões: sm e md = 1 linha; lg e xl = 2 linhas (3+1). */}
+      <div
+        className="grid gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-700/50"
+        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(4rem, 1fr))' }}
+      >
         <ActionButton
-          icon={<Tag size={18} />}
+          icon={<Tag className="w-[1.125em] h-[1.125em]" />}
           label="Promoção"
           active={!!item.is_promotion}
-          activeClass="text-orange-600 bg-orange-50 border-orange-200"
+          activeClass="text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-900"
           onClick={onTogglePromotion}
         />
         <ActionButton
-          icon={<Image size={18} />}
+          icon={<Image className="w-[1.125em] h-[1.125em]" />}
           label="Foto"
           onClick={() => {
             const input = document.createElement('input')
@@ -93,20 +109,20 @@ export default function ItemCard({
         />
         {!!item.has_photo && onViewPhoto && (
           <ActionButton
-            icon={<Eye size={18} />}
+            icon={<Eye className="w-[1.125em] h-[1.125em]" />}
             label="Ver"
             onClick={onViewPhoto}
           />
         )}
         <ActionButton
-          icon={<Pencil size={18} />}
+          icon={<Pencil className="w-[1.125em] h-[1.125em]" />}
           label="Editar"
           onClick={onEdit}
         />
         <ActionButton
-          icon={<Trash2 size={18} />}
+          icon={<Trash2 className="w-[1.125em] h-[1.125em]" />}
           label="Excluir"
-          activeClass="text-red-500 bg-red-50 border-red-200"
+          activeClass="text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-900"
           danger
           onClick={onDelete}
         />
@@ -130,8 +146,12 @@ function ActionButton({
   danger?: boolean
   onClick: () => void
 }) {
+  // max(): cresce com a fonte, nunca abaixo do mínimo físico de 44px.
   const base =
-    'flex-1 min-h-[44px] flex flex-col items-center justify-center gap-0.5 rounded-lg border transition-all duration-150 active:scale-95'
+    'min-h-[max(2.75rem,44px)] flex flex-col items-center justify-center gap-0.5 rounded-lg border ' +
+    'transition-all duration-150 active:scale-95 px-1 ' +
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ' +
+    'dark:focus-visible:ring-offset-slate-800'
   const idle = danger
     ? 'border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-900 hover:bg-red-50 dark:hover:bg-red-900/20'
     : 'border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'
@@ -139,10 +159,12 @@ function ActionButton({
     <button
       className={`${base} ${active ? activeClass : idle}`}
       onClick={onClick}
+      aria-label={label}
+      aria-pressed={active || undefined}
       title={label}
     >
       {icon}
-      <span className="text-[10px] font-medium leading-none">{label}</span>
+      <span className="text-[0.625rem] font-medium leading-none">{label}</span>
     </button>
   )
 }

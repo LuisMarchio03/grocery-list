@@ -40,7 +40,8 @@ export default function SyncStatus({ status, lastSyncedAt, online, onSync, hasCh
       <button
         onClick={onSync}
         title="Sincronizar agora"
-        className={`relative flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition-all duration-200 active:scale-95 ${
+        aria-label="Sincronizar agora"
+        className={`relative flex items-center gap-2 rounded-xl px-3 min-h-[max(2.75rem,44px)] text-xs font-medium transition-all duration-200 active:scale-95 ${
           isOffline
             ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900'
             : isError
@@ -51,9 +52,9 @@ export default function SyncStatus({ status, lastSyncedAt, online, onSync, hasCh
         }`}
       >
         {isOffline ? (
-          <CloudOff size={14} />
+          <CloudOff className="w-3.5 h-3.5" />
         ) : isError ? (
-          <AlertCircle size={14} />
+          <AlertCircle className="w-3.5 h-3.5" />
         ) : (
           <span className="relative flex h-2.5 w-2.5">
             {isLive && (
@@ -80,8 +81,7 @@ export default function SyncStatus({ status, lastSyncedAt, online, onSync, hasCh
         </span>
 
         <RefreshCw
-          size={12}
-          className={`transition-all duration-300 ${
+          className={`w-3 h-3 transition-all duration-300 ${
             isSyncing ? 'animate-spin opacity-100' : 'opacity-40 group-hover:opacity-100'
           }`}
         />

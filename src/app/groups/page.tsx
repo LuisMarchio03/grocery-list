@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Plus, Users, UserPlus, UserX, Trash2, X, Check, LogOut } from 'lucide-react'
+import { ArrowLeft, ChevronDown, Plus, Users, UserPlus, UserX, Trash2, X, Check, LogOut } from 'lucide-react'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import EmptyState from '@/components/EmptyState'
+import IconButton from '@/components/IconButton'
 import { useAuth } from '@/lib/AuthContext'
 import { useToast } from '@/lib/ToastContext'
 
@@ -157,32 +158,31 @@ export default function GroupsPage() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <button
+        <IconButton
+          icon={<ArrowLeft className="w-4 h-4" />}
+          label="Voltar para minhas listas"
           onClick={() => router.push('/')}
-          className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 transition-all"
-        >
-          <ArrowLeft size={18} />
-        </button>
+        />
         <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Grupos</h1>
       </div>
 
       <div className="flex gap-2 mb-6">
         <div className="flex-1 relative">
           <input
-            className="w-full h-11 pl-4 pr-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full h-11 pl-4 pr-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             placeholder="Nome do novo grupo..."
             value={newGroupName}
             onChange={e => setNewGroupName(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleCreate()}
           />
         </div>
-        <button
+        <IconButton
+          icon={<Plus className="w-5 h-5" />}
+          label="Criar grupo"
+          variant="primary"
           disabled={creating}
-          className="h-11 w-11 flex items-center justify-center rounded-xl bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 active:bg-blue-800 dark:active:bg-blue-700 active:scale-95 transition-all disabled:opacity-50 shadow-sm shadow-blue-200 dark:shadow-none"
           onClick={handleCreate}
-        >
-          <Plus size={20} />
-        </button>
+        />
       </div>
 
       {loading ? (
@@ -199,63 +199,63 @@ export default function GroupsPage() {
 
             return (
               <div key={group.id} className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700/50 shadow-sm dark:shadow-slate-900/30 transition-all">
-                <button
-                  className="w-full px-4 py-3.5 flex items-center gap-3 text-left"
-                  onClick={() => toggleExpand(group.id)}
-                >
-                  <div className="w-9 h-9 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
-                    <Users size={16} className="text-indigo-600 dark:text-indigo-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{group.name}</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                      {group.member_count} {group.member_count === 1 ? 'membro' : 'membros'}
-                      {isOwner && <span className="ml-2 text-indigo-500 dark:text-indigo-400">· Dono</span>}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1">
+                <div className="w-full px-4 py-3.5 flex items-center gap-3">
+                  <button
+                    type="button"
+                    className="flex-1 min-w-0 min-h-[max(2.75rem,44px)] flex items-center gap-3 text-left"
+                    onClick={() => toggleExpand(group.id)}
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
+                      <Users size={16} className="text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{group.name}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                        {group.member_count} {group.member_count === 1 ? 'membro' : 'membros'}
+                        {isOwner && <span className="ml-2 text-indigo-500 dark:text-indigo-400">· Dono</span>}
+                      </p>
+                    </div>
+                  </button>
+                  <div className="flex items-center gap-1 shrink-0">
                     {isOwner && (
-                      <button
-                        onClick={e => { e.stopPropagation(); setDeleteTarget(group) }}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
-                        title="Excluir grupo"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <IconButton
+                        icon={<Trash2 className="w-4 h-4" />}
+                        label={`Excluir grupo ${group.name}`}
+                        variant="danger"
+                        onClick={() => setDeleteTarget(group)}
+                        className="shrink-0"
+                      />
                     )}
-                    <button
-                      className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
-                        isExpanded ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      <svg
-                        className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
+                    <IconButton
+                      icon={<ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />}
+                      label={isExpanded ? `Recolher membros de ${group.name}` : `Ver membros de ${group.name}`}
+                      active={isExpanded}
+                      expanded={isExpanded}
+                      onClick={() => toggleExpand(group.id)}
+                      className="shrink-0"
+                    />
                   </div>
-                </button>
+                </div>
 
                 {isExpanded && (
                   <div className="px-4 pb-4 border-t border-slate-100 dark:border-slate-700/50 animate-fade-in">
                     {isOwner && (
                       <div className="flex gap-2 mt-3">
                         <input
-                          className="flex-1 h-9 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                          className="flex-1 h-9 px-3 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                           placeholder="Adicionar membro por usuário..."
                           value={addMemberUsername}
                           onChange={e => setAddMemberUsername(e.target.value)}
                           onKeyDown={e => { if (e.key === 'Enter') handleAddMember(group.id) }}
                         />
-                        <button
+                        <IconButton
+                          icon={<UserPlus className="w-4 h-4" />}
+                          label="Adicionar membro ao grupo"
+                          variant="primary"
                           disabled={addingMember || !addMemberUsername.trim()}
-                          className="h-9 w-9 flex items-center justify-center rounded-lg bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 active:scale-95 transition-all disabled:opacity-50"
                           onClick={() => handleAddMember(group.id)}
-                        >
-                          <UserPlus size={16} />
-                        </button>
+                          className="shrink-0"
+                        />
                       </div>
                     )}
 
@@ -273,13 +273,13 @@ export default function GroupsPage() {
                         <div key={member.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                           <span className="text-sm text-slate-700 dark:text-slate-300">{member.username}</span>
                           {isOwner && (
-                            <button
+                            <IconButton
+                              icon={<UserX className="w-4 h-4" />}
+                              label={`Remover ${member.username} do grupo`}
+                              variant="danger"
                               onClick={() => handleRemoveMember(group.id, member.id, member.username)}
-                              className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
-                              title="Remover membro"
-                            >
-                              <UserX size={14} />
-                            </button>
+                              className="shrink-0"
+                            />
                           )}
                         </div>
                       ))}

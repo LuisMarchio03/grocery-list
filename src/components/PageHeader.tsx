@@ -2,6 +2,7 @@
 
 import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import IconButton from '@/components/IconButton'
 
 type Props = {
   title: string
@@ -14,14 +15,14 @@ export default function PageHeader({ title, backTo }: Props) {
   return (
     <div className="flex items-center gap-3">
       {backTo && (
-        <button
-          className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:border-slate-300 dark:hover:border-slate-600 active:bg-slate-50 dark:active:bg-slate-700 transition-all shrink-0"
+        <IconButton
+          icon={<ArrowLeft className="w-5 h-5" />}
+          label="Voltar"
           onClick={() => router.push(backTo)}
-        >
-          <ArrowLeft size={20} />
-        </button>
+          className="shrink-0 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+        />
       )}
-      <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100 truncate">{title}</h1>
+      <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100 min-w-0 truncate">{title}</h1>
     </div>
   )
 }

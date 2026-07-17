@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
+import IconButton from '@/components/IconButton'
 
 type Props = {
   onAdd: (name: string, quantity: string) => void
@@ -32,7 +33,6 @@ export default function AddItemForm({ onAdd, existingNames = [], onDuplicate }: 
           value={name}
           onChange={e => setName(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-          autoFocus
         />
       </div>
       <input
@@ -42,12 +42,12 @@ export default function AddItemForm({ onAdd, existingNames = [], onDuplicate }: 
         onChange={e => setQty(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && handleSubmit()}
       />
-      <button
-        className="h-11 w-11 flex items-center justify-center rounded-xl bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 active:bg-blue-800 dark:active:bg-blue-700 active:scale-95 transition-all shadow-sm shadow-blue-200 dark:shadow-none"
+      <IconButton
+        icon={<Plus className="w-5 h-5" />}
+        label="Adicionar produto"
+        variant="primary"
         onClick={handleSubmit}
-      >
-        <Plus size={20} />
-      </button>
+      />
     </div>
   )
 }
