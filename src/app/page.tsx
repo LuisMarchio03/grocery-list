@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, Trash2, ShoppingBag, Check, Users, LogOut, User, ChevronDown, RefreshCw } from 'lucide-react'
+import { Pencil, Trash2, ShoppingBag, Check, Users, LogOut, User, ChevronDown, RefreshCw } from 'lucide-react'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import EmptyState from '@/components/EmptyState'
 import IconButton from '@/components/IconButton'
@@ -29,7 +29,6 @@ export default function Home() {
   const [editName, setEditName] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<ListRow | null>(null)
   const [groups, setGroups] = useState<GroupOption[]>([])
-  const [selectedGroup, setSelectedGroup] = useState<string>('')
   const [showGroupPicker, setShowGroupPicker] = useState(false)
   const router = useRouter()
 
@@ -39,11 +38,16 @@ export default function Home() {
     })
   }, [])
 
-  function handleCreate() {
+  function handleCreatePrivate() {
     if (!newName.trim()) return
-    createList(newName, selectedGroup || undefined)
+    createList(newName)
     setNewName('')
-    setSelectedGroup('')
+  }
+
+  function handleCreateInGroup(groupId: string) {
+    if (!newName.trim()) return
+    createList(newName, groupId)
+    setNewName('')
     setShowGroupPicker(false)
   }
 
@@ -109,60 +113,55 @@ export default function Home() {
       <OfflineBanner online={online} />
 
       <div className="mb-6">
-        <div className="flex gap-2">
+        <div className="flex gap-2 mb-2">
           <div className="flex-1 relative">
             <input
               className="w-full h-11 pl-4 pr-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-              placeholder="Nova lista..."
+              placeholder="Nome da lista..."
               value={newName}
               onChange={e => setNewName(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleCreate()}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !groups.length) handleCreatePrivate()
+              }}
             />
           </div>
-          <IconButton
-            icon={<Plus className="w-5 h-5" />}
-            label="Adicionar lista"
-            variant="primary"
-            onClick={handleCreate}
-          />
         </div>
-
-        {groups.length > 0 && (
-          <div className="mt-2 relative">
-            <button
-              type="button"
-              className="min-h-[max(2.75rem,44px)] flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors px-1"
-              onClick={() => setShowGroupPicker(!showGroupPicker)}
-              aria-expanded={showGroupPicker}
-              aria-haspopup="listbox"
-            >
-              <Users className="w-3 h-3" />
-              {selectedGroup ? groups.find(g => g.id === selectedGroup)?.name : 'Lista privada'}
-              <ChevronDown className="w-3 h-3" />
-            </button>
-            {showGroupPicker && (
-              <div className="absolute top-full left-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg dark:shadow-slate-900/50 z-10 py-1 min-w-[160px] animate-fade-in">
-                <button
-                  className={`w-full text-left px-3 min-h-[max(2.75rem,44px)] text-sm transition-colors flex items-center gap-2 ${!selectedGroup ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
-                  onClick={() => { setSelectedGroup(''); setShowGroupPicker(false) }}
-                >
-                  <User className="w-4 h-4" />
-                  Privada
-                </button>
-                {groups.map(g => (
-                  <button
-                    key={g.id}
-                    className={`w-full text-left px-3 min-h-[max(2.75rem,44px)] text-sm transition-colors flex items-center gap-2 ${selectedGroup === g.id ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
-                    onClick={() => { setSelectedGroup(g.id); setShowGroupPicker(false) }}
-                  >
-                    <Users className="w-4 h-4" />
-                    {g.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        <div className="flex gap-2">
+          <button
+            onClick={handleCreatePrivate}
+            disabled={!newName.trim()}
+            className="flex-1 min-h-[max(2.75rem,44px)] flex items-center justify-center gap-2 rounded-xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-blue-200 dark:shadow-none"
+          >
+            <User className="w-4 h-4" /> Criar lista privada
+          </button>
+          {groups.length > 0 && (
+            <div className="relative flex-1">
+              <button
+                onClick={() => setShowGroupPicker(!showGroupPicker)}
+                disabled={!newName.trim()}
+                className="w-full min-h-[max(2.75rem,44px)] flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-expanded={showGroupPicker}
+                aria-haspopup="listbox"
+              >
+                <Users className="w-4 h-4" /> Criar no grupo <ChevronDown className="w-3 h-3" />
+              </button>
+              {showGroupPicker && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg dark:shadow-slate-900/50 z-10 py-1 animate-fade-in">
+                  {groups.map(g => (
+                    <button
+                      key={g.id}
+                      className="w-full text-left px-3 min-h-[max(2.75rem,44px)] text-sm transition-colors flex items-center gap-2 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                      onClick={() => handleCreateInGroup(g.id)}
+                    >
+                      <Users className="w-4 h-4" />
+                      {g.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {loadingFirst ? (
