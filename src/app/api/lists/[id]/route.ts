@@ -7,9 +7,10 @@ async function canAccessList(listId: string, userId: string): Promise<boolean> {
   const result = await db.execute({
     sql: `SELECT id FROM lists WHERE id = ? AND (
       created_by = ? OR
-      group_id IN (SELECT group_id FROM group_members WHERE user_id = ?)
+      group_id IN (SELECT group_id FROM group_members WHERE user_id = ?) OR
+      group_id IN (SELECT g.id FROM groups g WHERE g.created_by = ?)
     )`,
-    args: [listId, userId, userId],
+    args: [listId, userId, userId, userId],
   })
   return result.rows.length > 0
 }

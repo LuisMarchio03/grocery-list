@@ -9,9 +9,10 @@ async function canAccessItem(itemId: string, userId: string): Promise<boolean> {
      JOIN lists l ON l.id = i.list_id
      WHERE i.id = ? AND (
        l.created_by = ? OR
-       l.group_id IN (SELECT group_id FROM group_members WHERE user_id = ?)
+       l.group_id IN (SELECT group_id FROM group_members WHERE user_id = ?) OR
+       l.group_id IN (SELECT g.id FROM groups g WHERE g.created_by = ?)
      )`,
-    args: [itemId, userId, userId],
+    args: [itemId, userId, userId, userId],
   })
   return result.rows.length > 0
 }

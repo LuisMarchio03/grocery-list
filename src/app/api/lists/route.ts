@@ -13,10 +13,11 @@ export async function GET() {
             g.name AS group_name
      FROM lists l
      LEFT JOIN groups g ON g.id = l.group_id
-     WHERE l.created_by = ?
-        OR l.group_id IN (SELECT gm.group_id FROM group_members gm WHERE gm.user_id = ?)
+      WHERE l.created_by = ?
+         OR l.group_id IN (SELECT gm.group_id FROM group_members gm WHERE gm.user_id = ?)
+         OR l.group_id IN (SELECT g.id FROM groups g WHERE g.created_by = ?)
      ORDER BY l.created_at DESC`,
-    args: [user.userId, user.userId],
+    args: [user.userId, user.userId, user.userId],
   })
   return NextResponse.json(result.rows)
 }
