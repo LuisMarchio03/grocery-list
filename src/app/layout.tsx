@@ -12,7 +12,8 @@ export const metadata: Metadata = {
     title: 'Lista Compras',
   },
   icons: {
-    apple: '/icons/icon-192.svg',
+    icon: '/icons/icon.svg',
+    apple: '/icons/apple-touch-icon.png',
   },
 }
 
@@ -34,7 +35,7 @@ export default function RootLayout({
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <script
           // Bloqueante de propósito: precisa rodar antes do primeiro paint,
           // senão a página pisca branca e a fonte salta de tamanho.

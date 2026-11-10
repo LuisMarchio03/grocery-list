@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/icons/icon-192.svg" alt="Lista de Compras" width="96" height="96" />
+  <img src="public/icons/icon.svg" alt="Lista de Compras" width="96" height="96" />
 </p>
 
 <h1 align="center">🛒 Lista de Compras</h1>
@@ -257,7 +257,7 @@ turso db shell grocery-list < schema.sql
 ```
 📦 grocery-list
 ├── 📂 public                 # Assets estáticos
-│   ├── 📂 icons              # Ícones PWA (192px, 512px)
+│   ├── 📂 icons              # Ícones PWA (SVG, 192, 512, maskable)
 │   ├── 📄 manifest.json      # Manifest do PWA
 │   └── 📄 sw.js              # Service Worker
 ├── 📂 src
